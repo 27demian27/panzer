@@ -9,8 +9,15 @@ import java.util.List;
 
 public class Battleground {
 
-    private @Getter List<Tank> tanks = new ArrayList<>();
-    private List<Bullet> bullets = new ArrayList<>();
+    private @Getter Tank playerTank;
+
+    private final @Getter List<Tank> tanks = new ArrayList<>();
+    private final @Getter List<Bullet> bullets = new ArrayList<>();
+
+    public void addPlayerTank(Tank tank) {
+        playerTank = tank;
+        tanks.add(tank);
+    }
 
     public void addTank(Tank tank) {
         tanks.add(tank);
