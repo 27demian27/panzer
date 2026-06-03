@@ -1,8 +1,6 @@
-package nl.demiannieuwenhuis.panzer;
+package nl.demiannieuwenhuis.panzer.game.model;
 
 import lombok.Getter;
-import nl.demiannieuwenhuis.panzer.game.model.Bullet;
-import nl.demiannieuwenhuis.panzer.game.model.Tank;
 
 import java.util.ArrayList;
 import java.util.List;

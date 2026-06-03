@@ -2,7 +2,7 @@ package nl.demiannieuwenhuis.panzer.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import nl.demiannieuwenhuis.panzer.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 
@@ -35,7 +35,14 @@ public class GameLoop implements Runnable {
 
     private void handleControls() {
         Direction8 direction = computePlayerDirection();
-        battleground.getPlayerTank().setDirection(direction);
+
+        if (direction == null) {
+            battleground.getPlayerTank().setStationary(true);
+        } else {
+            battleground.getPlayerTank().setStationary(false);
+            battleground.getPlayerTank().setDirection(direction);
+        }
+
     }
 
     private Direction8 computePlayerDirection() {
@@ -47,8 +54,6 @@ public class GameLoop implements Runnable {
 
         if (moveDirection.contains("NS")) moveDirection = moveDirection.replace("NS", "");
         if (moveDirection.contains("EW")) moveDirection = moveDirection.replace("EW", "");
-
-        System.out.println("moveDirection: " + moveDirection + "\n");
 
         if (moveDirection.isBlank()) return null;
 
