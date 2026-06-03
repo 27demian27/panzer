@@ -47,6 +47,7 @@ public class Tank {
                 }
             }
         }
+        cannon.update(dt);
     }
 
     // Rotatie hoeken zijn een beetje raar, maar werken zo. Onderzoek nodig naar LibGDX gedrag.

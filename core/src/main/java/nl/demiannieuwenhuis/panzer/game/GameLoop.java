@@ -5,6 +5,9 @@ import com.badlogic.gdx.Input;
 import nl.demiannieuwenhuis.panzer.game.model.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
+import nl.demiannieuwenhuis.physics.util.Vector2D;
+
+import java.util.Vector;
 
 public class GameLoop implements Runnable {
 
@@ -43,6 +46,32 @@ public class GameLoop implements Runnable {
             battleground.getPlayerTank().setDirection(direction);
         }
 
+        battleground.getPlayerTank().cannon.setRotating_direction(computePlayerCannonRotationDirection());
+
+    }
+
+    private short computePlayerCannonRotationDirection() {
+        Tank playerTank = battleground.getPlayerTank();
+        Vector2D mousePointer = new Vector2D(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+        Vector2D cannonOrigin = new Vector2D(playerTank.hitbox.getCenterOfMass());
+        float mouseAngle = (float) (mousePointer.subtract(cannonOrigin).angle() * (180 / Math.PI)) - 90.0f;
+
+        float diff = mouseAngle - playerTank.cannon.getAngle();
+
+        while (diff > 180) diff -= 360;
+        while (diff < -180) diff += 360;
+
+        System.out.println(diff);
+
+        if (diff > -4.0f && diff < 4.0f)
+            return 0;
+
+        if (diff > 0)
+            return 1;
+        if (diff < 0)
+            return -1;
+
+        return 0;
     }
 
     private Direction8 computePlayerDirection() {

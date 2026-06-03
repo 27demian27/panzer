@@ -84,14 +84,14 @@ public class Renderer {
             cannonWidth / 2.0f, -turretLength / 2.0f,
             cannonWidth, cannonLength,
             1.0f, 1.0f,
-            tank.getRotation()
+            tank.cannon.getAngle()
         );
         shapeRenderer.rect(
             centerX - turretWidth / 2.0f, centerY - turretLength / 2.0f,
             turretWidth / 2.0f, turretLength / 2.0f,
             turretWidth, turretLength,
             1.0f, 1.0f,
-            tank.getRotation()
+            tank.cannon.getAngle()
         );
 
         shapeRenderer.end();
