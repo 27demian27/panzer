@@ -7,17 +7,18 @@ import java.util.List;
 
 public class Battleground {
 
-    private @Getter Tank playerTank;
 
+    private final @Getter List<Tank> playerTanks = new ArrayList<>();
+    private final @Getter List<Tank> botTanks = new ArrayList<>();
     private final @Getter List<Tank> tanks = new ArrayList<>();
     private final @Getter List<Shell> shells = new ArrayList<>();
 
-    public void addPlayerTank(Tank tank) {
-        playerTank = tank;
-        tanks.add(tank);
-    }
 
     public void addTank(Tank tank) {
+        if (tank.getInputType().equals(TankInputType.PLAYER))
+            playerTanks.add(tank);
+        else if (tank.getInputType().equals(TankInputType.BOT))
+            botTanks.add(tank);
         tanks.add(tank);
     }
 

@@ -2,6 +2,8 @@ package nl.demiannieuwenhuis.panzer.game.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
+import nl.demiannieuwenhuis.panzer.game.ai.RandomizedBotScript;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
@@ -10,6 +12,9 @@ public class Tank {
     public final Rect hitbox;
     public final Cannon cannon;
 
+    private final @Getter TankInputType inputType;
+    private @Getter BotScript botScript;
+
     private final @Getter float movement_speed = 78;
     private final float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
 
@@ -17,11 +22,15 @@ public class Tank {
 
     private @Setter boolean stationary;
 
-    public Tank(float x, float y, float width, float height, double mass) {
+    public Tank(float x, float y, float width, float height, double mass, TankInputType inputType) {
+        this.inputType = inputType;
         this.hitbox = new Rect(mass, x, y, width, height);
         this.cannon = new Cannon(width / 6.0f, height / 2.0f);
         this.direction = null;
         this.stationary = true;
+
+        if (inputType.equals(TankInputType.BOT))
+            botScript = new RandomizedBotScript(this);
     }
 
     public void update(float dt) {

@@ -1,14 +1,13 @@
 package nl.demiannieuwenhuis.panzer;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.Battleground;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
 import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
+import nl.demiannieuwenhuis.panzer.game.model.TankInputType;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -22,7 +21,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         battleground = new Battleground();
-        battleground.addPlayerTank(new Tank(100, 100, 30, 50, 9000));
+        battleground.addTank(new Tank(100, 100, 30, 50, 9000, TankInputType.PLAYER));
+        battleground.addTank(new Tank(500, 500, 30, 50, 9000, TankInputType.BOT));
         renderer = new Renderer();
         gameLoop = new GameLoop(battleground);
         gameThread = Thread.ofPlatform().start(gameLoop);
@@ -30,13 +30,15 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.796f,0.741f,0.576f, 1.0f);
+        ScreenUtils.clear(Renderer.TERRAIN_COLOR);
 
         if (battleground.getShells() != null) {
             for (Shell shell : battleground.getShells()) {
                 renderer.renderShell(shell);
             }
         }
+
+//        renderer.renderTrackRuts(); // Big performance hit
 
         if (battleground.getTanks() != null) {
             for (Tank tank : battleground.getTanks()) {

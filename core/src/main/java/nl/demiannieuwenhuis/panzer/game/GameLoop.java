@@ -10,6 +10,8 @@ import nl.demiannieuwenhuis.physics.util.Vector2D;
 
 public class GameLoop implements Runnable {
 
+    public final static float MAX_GAME_UPDATE_TIME = 0.017f;
+
     private final Battleground battleground;
     private boolean running = false;
 
@@ -26,6 +28,7 @@ public class GameLoop implements Runnable {
             while (!stopped) {
                 if (running) {
                     handleControls();
+                    updateBots();
                     updateBattleground();
                 } else {
                     if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -39,9 +42,17 @@ public class GameLoop implements Runnable {
         }
     }
 
-    private void handleControls() throws InterruptedException {
-        Tank playerTank = battleground.getPlayerTank();
+    private void updateBots() {
+        for (Tank bot : battleground.getBotTanks()) {
+            bot.getBotScript().execute(MAX_GAME_UPDATE_TIME);
+        }
+    }
 
+    private void handleControls() {
+        if (battleground.getPlayerTanks() == null || battleground.getPlayerTanks().isEmpty())
+            return;
+
+        Tank playerTank = battleground.getPlayerTanks().getFirst();
         Direction8 direction = computePlayerDirection();
 
         if (direction == null) {
@@ -51,7 +62,7 @@ public class GameLoop implements Runnable {
             playerTank.setDirection(direction);
         }
 
-        playerTank.cannon.setRotating_direction(computePlayerCannonRotationDirection());
+        playerTank.cannon.setRotating_direction(computePlayerCannonRotationDirection(playerTank));
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             boolean shot = playerTank.cannon.tryShoot();
@@ -62,8 +73,7 @@ public class GameLoop implements Runnable {
         }
     }
 
-    private short computePlayerCannonRotationDirection() {
-        Tank playerTank = battleground.getPlayerTank();
+    private short computePlayerCannonRotationDirection(Tank playerTank) {
         Vector2D mousePointer = new Vector2D(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
         Vector2D cannonOrigin = new Vector2D(playerTank.hitbox.getCenterOfMass());
         float mouseAngle = (float) (mousePointer.subtract(cannonOrigin).angle() * (180 / Math.PI)) - 90.0f;
@@ -102,7 +112,7 @@ public class GameLoop implements Runnable {
 
     private void updateBattleground() {
         for (Tank tank : battleground.getTanks()) {
-            tank.update(0.017f);
+            tank.update(MAX_GAME_UPDATE_TIME);
             if (tank.cannon.hasShootRequest()) {
                 Shell shell = tank.shoot();
                 System.out.println(shell.getDirection());
@@ -112,7 +122,7 @@ public class GameLoop implements Runnable {
         }
 
         for (Shell shell: battleground.getShells()) {
-            shell.update(0.017f);
+            shell.update(MAX_GAME_UPDATE_TIME);
         }
 
     }
