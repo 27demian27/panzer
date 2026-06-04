@@ -20,10 +20,10 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-        battleground = new Battleground();
+        battleground = new Battleground(1600, 900);
         battleground.addTank(new Tank(100, 100, 30, 50, 9000, TankInputType.PLAYER));
         battleground.addTank(new Tank(500, 500, 30, 50, 9000, TankInputType.BOT));
-        renderer = new Renderer();
+        renderer = new Renderer(battleground.getTanks().size());
         gameLoop = new GameLoop(battleground);
         gameThread = Thread.ofPlatform().start(gameLoop);
     }

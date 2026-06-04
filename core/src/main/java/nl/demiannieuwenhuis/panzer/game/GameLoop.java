@@ -8,6 +8,8 @@ import nl.demiannieuwenhuis.panzer.game.model.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import java.util.ListIterator;
+
 public class GameLoop implements Runnable {
 
     public final static float MAX_GAME_UPDATE_TIME = 0.017f;
@@ -35,7 +37,7 @@ public class GameLoop implements Runnable {
                         resume();
                     }
                 }
-                Thread.sleep(17);
+                Thread.sleep((long) (MAX_GAME_UPDATE_TIME * 1000));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -115,15 +117,19 @@ public class GameLoop implements Runnable {
             tank.update(MAX_GAME_UPDATE_TIME);
             if (tank.cannon.hasShootRequest()) {
                 Shell shell = tank.shoot();
-                System.out.println(shell.getDirection());
                 battleground.addBullet(shell);
                 tank.cannon.clearShotRequest();
             }
+            battleground.clampTankPos(tank);
         }
 
-        for (Shell shell: battleground.getShells()) {
+        for (Shell shell : battleground.getShells()) {
+            System.out.println(shell.hitbox.getCenterOfMass());
             shell.update(MAX_GAME_UPDATE_TIME);
         }
+
+        battleground.removeOutOfBoundsShells();
+
 
     }
 

@@ -8,9 +8,7 @@ import lombok.AllArgsConstructor;
 import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class Renderer {
@@ -20,15 +18,16 @@ public class Renderer {
     public static final Color TRACK_COLOR = Color.DARK_GRAY;
     public static final Color TRACK_RUTS_COLOR = new Color(TERRAIN_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
 
-    private final int MAX_RUTS = 200;
+    private final int MAX_RUTS;
 
     private final ShapeRenderer shapeRenderer;
 
     private final Queue<RectArgs> trackRuts;
 
-    public Renderer() {
+    public Renderer(int tankCount) {
         this.shapeRenderer = new ShapeRenderer();
         this.trackRuts = new LinkedList<>();
+        MAX_RUTS = 200 * tankCount;
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);

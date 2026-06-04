@@ -42,15 +42,7 @@ public abstract class BotScript {
         tank.setStationary(currentInstruction.stationary());
     }
 
-    public BotInstruction getCurrentInstruction() {
-        return instructions.peek();
-    }
-
     protected abstract BotInstruction generateInstruction();
-
-    public void addNextInstruction() {
-        instructions.add(generateInstruction());
-    }
 
 
 }
