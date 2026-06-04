@@ -31,7 +31,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(0.796f,0.741f,0.576f, 1.0f);
-        
+
         if (battleground.getShells() != null) {
             for (Shell shell : battleground.getShells()) {
                 renderer.renderShell(shell);

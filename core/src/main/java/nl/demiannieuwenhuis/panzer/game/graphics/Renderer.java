@@ -99,9 +99,14 @@ public class Renderer {
     }
 
     public void renderShell(Shell shell) {
+        float x = (float) shell.hitbox.getX();
+        float y = (float) shell.hitbox.getY();
+        float width = (float) shell.hitbox.radius;
+        float angle = (float) Math.toDegrees(shell.getDirection().angle()) + 90.0f;
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.circle((float) shell.hitbox.getX(), (float) shell.hitbox.getY(), (float) shell.hitbox.radius);
+        shapeRenderer.setColor(Color.DARK_GRAY);
+        shapeRenderer.rect(x, y, 0, 0, width, width * 2.0f, 1.0f, 1.0f, angle);
         shapeRenderer.end();
     }
 
