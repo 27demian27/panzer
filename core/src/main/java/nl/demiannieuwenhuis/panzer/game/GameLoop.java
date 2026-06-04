@@ -3,11 +3,10 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import nl.demiannieuwenhuis.panzer.game.model.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
-
-import java.util.Vector;
 
 public class GameLoop implements Runnable {
 
@@ -28,6 +27,10 @@ public class GameLoop implements Runnable {
                 if (running) {
                     handleControls();
                     updateBattleground();
+                } else {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                        resume();
+                    }
                 }
                 Thread.sleep(17);
             }
@@ -36,18 +39,27 @@ public class GameLoop implements Runnable {
         }
     }
 
-    private void handleControls() {
+    private void handleControls() throws InterruptedException {
+        Tank playerTank = battleground.getPlayerTank();
+
         Direction8 direction = computePlayerDirection();
 
         if (direction == null) {
-            battleground.getPlayerTank().setStationary(true);
+            playerTank.setStationary(true);
         } else {
-            battleground.getPlayerTank().setStationary(false);
-            battleground.getPlayerTank().setDirection(direction);
+            playerTank.setStationary(false);
+            playerTank.setDirection(direction);
         }
 
-        battleground.getPlayerTank().cannon.setRotating_direction(computePlayerCannonRotationDirection());
+        playerTank.cannon.setRotating_direction(computePlayerCannonRotationDirection());
 
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            boolean shot = playerTank.cannon.tryShoot();
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            pause();
+        }
     }
 
     private short computePlayerCannonRotationDirection() {
@@ -61,7 +73,6 @@ public class GameLoop implements Runnable {
         while (diff > 180) diff -= 360;
         while (diff < -180) diff += 360;
 
-        System.out.println(diff);
 
         if (diff > -4.0f && diff < 4.0f)
             return 0;
@@ -92,7 +103,18 @@ public class GameLoop implements Runnable {
     private void updateBattleground() {
         for (Tank tank : battleground.getTanks()) {
             tank.update(0.017f);
+            if (tank.cannon.hasShootRequest()) {
+                Shell shell = tank.shoot();
+                System.out.println(shell.getDirection());
+                battleground.addBullet(shell);
+                tank.cannon.clearShotRequest();
+            }
         }
+
+        for (Shell shell: battleground.getShells()) {
+            shell.update(0.017f);
+        }
+
     }
 
     public void stop() {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.Battleground;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
+import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -30,12 +31,19 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(0.796f,0.741f,0.576f, 1.0f);
+        
+        if (battleground.getShells() != null) {
+            for (Shell shell : battleground.getShells()) {
+                renderer.renderShell(shell);
+            }
+        }
 
         if (battleground.getTanks() != null) {
             for (Tank tank : battleground.getTanks()) {
                 renderer.renderTank(tank);
             }
         }
+
 
     }
 

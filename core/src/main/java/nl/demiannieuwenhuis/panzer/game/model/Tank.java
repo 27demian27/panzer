@@ -2,7 +2,9 @@ package nl.demiannieuwenhuis.panzer.game.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
+import nl.demiannieuwenhuis.physics.util.Vector2D;
 
 public class Tank {
     public final Rect hitbox;
@@ -17,7 +19,7 @@ public class Tank {
 
     public Tank(float x, float y, float width, float height, double mass) {
         this.hitbox = new Rect(mass, x, y, width, height);
-        this.cannon = new Cannon();
+        this.cannon = new Cannon(width / 6.0f, height / 2.0f);
         this.direction = null;
         this.stationary = true;
     }
@@ -48,6 +50,30 @@ public class Tank {
             }
         }
         cannon.update(dt);
+    }
+
+
+    /**
+     * Spawn new Shell from middle of tank with hardcoded width.
+     * @return Shell to be added to the Battlefield
+     */
+    public Shell shoot() {
+        return new Shell(
+            cannon.getShell_speed(),
+            cannon.getShell_damage(),
+            getCannonDirection(),
+            new Circle(10, hitbox.getCenterOfMass().x, hitbox.getCenterOfMass().y, cannon.getShell_size())
+        );
+
+    }
+
+    // FIX
+    private Vector2D getCannonDirection() {
+        return new Vector2D(
+                Math.cos(Math.toRadians(cannon.getAngle() + 90.0f)),
+                Math.sin(Math.toRadians(cannon.getAngle() + 90.0f))
+            )
+            .normalized();
     }
 
     // Rotatie hoeken zijn een beetje raar, maar werken zo. Onderzoek nodig naar LibGDX gedrag.

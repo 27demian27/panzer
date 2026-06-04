@@ -2,6 +2,7 @@ package nl.demiannieuwenhuis.panzer.game.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 
 public class Renderer {
@@ -32,8 +33,8 @@ public class Renderer {
 
         float turretWidth = tank_width / 1.25f;
         float turretLength = turretWidth;
-        float cannonWidth = tank_width / 6.0f;
-        float cannonLength = tank_length / 2.0f;
+        float cannonWidth = tank.cannon.getWidth();
+        float cannonLength = tank.cannon.getLength();
 
         // LEFT TRACK
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -94,6 +95,13 @@ public class Renderer {
             tank.cannon.getAngle()
         );
 
+        shapeRenderer.end();
+    }
+
+    public void renderShell(Shell shell) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.circle((float) shell.hitbox.getX(), (float) shell.hitbox.getY(), (float) shell.hitbox.radius);
         shapeRenderer.end();
     }
 
