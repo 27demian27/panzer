@@ -12,6 +12,9 @@ public class Tank {
     public final Rect hitbox;
     public final Cannon cannon;
 
+    private float max_health = 100.0f;
+    private float current_health = max_health;
+
     private final @Getter TankInputType inputType;
     private @Getter BotScript botScript;
 
@@ -63,20 +66,20 @@ public class Tank {
 
 
     /**
-     * Spawn new Shell from middle of tank with hardcoded width.
+     * Spawn new Shell from middle of tank.
      * @return Shell to be added to the Battlefield
      */
     public Shell shoot() {
         return new Shell(
             cannon.getShell_speed(),
             cannon.getShell_damage(),
+            this,
             getCannonDirection(),
             new Circle(10, hitbox.getCenterOfMass().x, hitbox.getCenterOfMass().y, cannon.getShell_size())
         );
 
     }
 
-    // FIX
     private Vector2D getCannonDirection() {
         return new Vector2D(
                 Math.cos(Math.toRadians(cannon.getAngle() + 90.0f)),
@@ -85,7 +88,7 @@ public class Tank {
             .normalized();
     }
 
-    // Rotatie hoeken zijn een beetje raar, maar werken zo. Onderzoek nodig naar LibGDX gedrag.
+    // Rotatie hoeken zijn een beetje raar, maar werken zo. LibGDX gedrag.
     public float getRotation() {
         return switch (direction) {
             case W -> 90.0f;
@@ -98,6 +101,12 @@ public class Tank {
             case SW -> -225.0f;
             case null -> 0.0f;
         };
+    }
+
+    public void resolveShellHit(Shell shell) {
+        System.out.println(this + " HIT!");
+        current_health -= shell.getDamage();
+        System.out.println("new health: " + current_health);
     }
 
 }

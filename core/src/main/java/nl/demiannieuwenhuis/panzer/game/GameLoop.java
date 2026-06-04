@@ -124,12 +124,11 @@ public class GameLoop implements Runnable {
         }
 
         for (Shell shell : battleground.getShells()) {
-            System.out.println(shell.hitbox.getCenterOfMass());
             shell.update(MAX_GAME_UPDATE_TIME);
         }
 
         battleground.removeOutOfBoundsShells();
-
+        battleground.resolveShellHits();
 
     }
 

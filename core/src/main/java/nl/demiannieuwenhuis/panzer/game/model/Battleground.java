@@ -1,10 +1,13 @@
 package nl.demiannieuwenhuis.panzer.game.model;
 
 import lombok.Getter;
+import nl.demiannieuwenhuis.physics.util.CollisionData;
+import nl.demiannieuwenhuis.physics.util.Collisions;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Getter
 public class Battleground {
@@ -12,26 +15,34 @@ public class Battleground {
     private final float width;
     private final float height;
 
-    private final List<Tank> playerTanks = new ArrayList<>();
-    private final List<Tank> botTanks = new ArrayList<>();
-    private final List<Tank> tanks = new ArrayList<>();
-    private final List<Shell> shells = new ArrayList<>();
+    private final List<Tank> playerTanks = new CopyOnWriteArrayList<>();
+    private final List<Tank> botTanks = new CopyOnWriteArrayList<>();
+    private final List<Tank> tanks = new CopyOnWriteArrayList<>();
+    private final List<Shell> shells = new CopyOnWriteArrayList<>();
 
     public Battleground(float width, float height) {
         this.width = width;
         this.height = height;
     }
 
-    public void removeOutOfBoundsShells() {
-        ListIterator<Shell> iter = getShells().listIterator();
-        while (iter.hasNext()) {
-            Shell shell = iter.next();
-            if (shell.hitbox.getX() < 0 || shell.hitbox.getX() >= width) {
-                iter.remove();
-            } else if (shell.hitbox.getY() < 0 || shell.hitbox.getY() >= height) {
-                iter.remove();
-            }
+    public void resolveShellHits() {
+        for (Tank tank : tanks) {
+            shells.removeIf(shell -> {
+                if (shell.getShooter() == tank) return false;
+                CollisionData collisionData =  Collisions.rectCircle(tank.hitbox, shell.hitbox);
+                if (collisionData.colliding) tank.resolveShellHit(shell);
+                return collisionData.colliding;
+            });
         }
+    }
+
+    public void removeOutOfBoundsShells() {
+        shells.removeIf(
+            shell -> shell.hitbox.getX() < 0 ||
+                shell.hitbox.getX() >= width ||
+                shell.hitbox.getY() < 0 ||
+                shell.hitbox.getY() >= height
+        );
     }
 
     public void clampTankPos(Tank tank) {

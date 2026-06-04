@@ -10,14 +10,16 @@ import nl.demiannieuwenhuis.physics.util.Vector2D;
 public class Shell {
 
     private float speed;
-    private float damage;
+    private @Getter float damage;
+    private @Getter final Tank shooter;
 
     public final Circle hitbox;
     private @Getter final Vector2D direction;
 
-    public Shell(float speed, float damage, Vector2D direction, Circle hitbox) {
+    public Shell(float speed, float damage, Tank shooter, Vector2D direction, Circle hitbox) {
         this.speed = speed;
         this.damage = damage;
+        this.shooter = shooter;
         this.direction = direction;
         this.hitbox = hitbox;
     }
