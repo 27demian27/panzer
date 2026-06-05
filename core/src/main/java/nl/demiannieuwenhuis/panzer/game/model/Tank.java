@@ -23,7 +23,7 @@ public class Tank {
 
     private @Setter Direction8 direction;
 
-    private @Setter boolean stationary;
+    private @Getter @Setter boolean stationary;
 
     public Tank(float x, float y, float width, float height, double mass, TankInputType inputType) {
         this.inputType = inputType;

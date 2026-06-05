@@ -2,30 +2,34 @@ package nl.demiannieuwenhuis.panzer.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Cursor;
+import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
-import java.util.ListIterator;
-
 public class GameLoop implements Runnable {
 
     public final static float MAX_GAME_UPDATE_TIME = 0.017f;
 
     private final Battleground battleground;
+
+    private final Renderer renderer;
     private boolean running = false;
 
     private boolean stopped = false;
 
-    public GameLoop(Battleground battleground) {
+    public GameLoop(Battleground battleground, Renderer renderer) {
         this.battleground = battleground;
+        this.renderer = renderer;
     }
 
     @Override
     public void run() {
         running = true;
+        Gdx.graphics.setCursor(renderer.getCrosshairCursor());
         try {
             while (!stopped) {
                 if (running) {
@@ -138,9 +142,11 @@ public class GameLoop implements Runnable {
 
     public void pause() {
         this.running = false;
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     }
 
     public void resume() {
         this.running = true;
+        Gdx.graphics.setCursor(renderer.getCrosshairCursor());
     }
 }

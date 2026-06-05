@@ -2,12 +2,17 @@ package nl.demiannieuwenhuis.panzer.game.graphics;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.model.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.Tank;
+import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -17,6 +22,9 @@ public class Renderer {
     public static final Color TURRET_COLOR = new Color(HULL_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
     public static final Color TRACK_COLOR = Color.DARK_GRAY;
     public static final Color TRACK_RUTS_COLOR = new Color(TERRAIN_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
+
+    private final @Getter Cursor crosshairCursor;
+    private Pixmap crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
 
     private final int MAX_RUTS;
 
@@ -29,8 +37,26 @@ public class Renderer {
         this.trackRuts = new LinkedList<>();
         MAX_RUTS = 200 * tankCount;
 
+        this.crosshairCursor = createCrosshair();
+
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    private Cursor createCrosshair() {
+        int centerX = crosshairPixmap.getWidth() / 2;
+        int centerY = crosshairPixmap.getHeight() / 2;
+        int radius = 4;
+
+        crosshairPixmap.setColor(Color.BLACK);
+        crosshairPixmap.drawCircle(centerX, centerY, radius);
+        crosshairPixmap.drawLine(centerX, 12, centerX, 20);
+        crosshairPixmap.drawLine(12, centerY, 20, centerY);
+        return Gdx.graphics.newCursor(
+            crosshairPixmap,
+            crosshairPixmap.getWidth() / 2,
+            crosshairPixmap.getHeight() / 2
+        );
     }
 
     public void renderTank(Tank tank) {
@@ -180,6 +206,11 @@ public class Renderer {
             a += 1f / MAX_RUTS;
         }
         shapeRenderer.end();
+    }
+
+    public void updateCrosshair() {
+//        tank.isStatonairy();
+
     }
 
     public void dispose() {

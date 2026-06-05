@@ -24,7 +24,7 @@ public class Main extends ApplicationAdapter {
         battleground.addTank(new Tank(100, 100, 30, 50, 9000, TankInputType.PLAYER));
         battleground.addTank(new Tank(500, 500, 30, 50, 9000, TankInputType.BOT));
         renderer = new Renderer(battleground.getTanks().size());
-        gameLoop = new GameLoop(battleground);
+        gameLoop = new GameLoop(battleground, renderer);
         gameThread = Thread.ofPlatform().start(gameLoop);
     }
 
@@ -38,7 +38,8 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-//        renderer.renderTrackRuts(); // Big performance hit
+        // Big performance hit
+//        renderer.renderTrackRuts();
 
         if (battleground.getTanks() != null) {
             for (Tank tank : battleground.getTanks()) {
@@ -46,7 +47,7 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-
+        renderer.updateCrosshair();
     }
 
 

@@ -64,7 +64,7 @@ subprojects {
     maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
     maven { url = 'https://jitpack.io' }
     maven {
-      url = uri("https://maven.pkg.github.com/YOUR_USERNAME/ENGINE_REPO")
+      url = uri("https://maven.pkg.github.com/27demian27/newtons")
 
       credentials {
         username = project.findProperty("gpr.user")
