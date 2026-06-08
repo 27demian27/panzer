@@ -35,7 +35,7 @@ public abstract class BotScript {
             currentInstruction = instructions.peek();
         }
 
-        tank.setDirection(currentInstruction.moveDirection());
+        tank.setMoveDirection(currentInstruction.moveDirection());
         tank.cannon.setRotating_direction(currentInstruction.turretDirection());
         if (currentInstruction.shooting())
             tank.cannon.tryShoot();

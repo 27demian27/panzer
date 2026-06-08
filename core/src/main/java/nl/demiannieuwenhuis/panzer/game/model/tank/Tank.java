@@ -8,6 +8,8 @@ import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
+
 public class Tank {
     public final Rect hitbox;
     public final Cannon cannon;
@@ -21,7 +23,8 @@ public class Tank {
     private final @Getter float movement_speed = 78;
     private final float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
 
-    private @Getter @Setter Direction8 direction;
+    private @Getter @Setter Direction8 moveDirection;
+    private @Getter @Setter Direction8 visualDirection;
 
     private @Getter @Setter boolean stationary;
 
@@ -29,7 +32,8 @@ public class Tank {
         this.inputType = inputType;
         this.hitbox = new Rect(mass, x, y, width, height);
         this.cannon = new Cannon(width / 6.0f, height / 2.0f);
-        this.direction = null;
+        this.moveDirection = null;
+        this.visualDirection = moveDirection;
         this.stationary = true;
 
         if (inputType.equals(TankInputType.BOT))
@@ -38,25 +42,66 @@ public class Tank {
 
     public void update(float dt) {
         if (!stationary) {
-            switch (direction) {
-                case W -> hitbox.setX(hitbox.getX() - movement_speed * dt);
+            switch (moveDirection) {
+                case W -> {
+                    if (visualDirection == E || visualDirection == NE || visualDirection == SE)
+                        visualDirection = E;
+                    else
+                        visualDirection = W;
+
+                    hitbox.setX(hitbox.getX() - movement_speed * dt);
+                }
                 case NW -> {
+                    if (visualDirection == SE || visualDirection == S || visualDirection == E)
+                        visualDirection = SE;
+                    else
+                        visualDirection = NW;
                     hitbox.setX(hitbox.getX() - diag_components_speed * dt);
                     hitbox.setY(hitbox.getY() + diag_components_speed * dt);
                 }
-                case N -> hitbox.setY(hitbox.getY() + movement_speed * dt);
+                case N -> {
+                    if (visualDirection == S || visualDirection == SW || visualDirection == SE)
+                        visualDirection = S;
+                    else
+                        visualDirection = N;
+                    hitbox.setY(hitbox.getY() + movement_speed * dt);
+                }
                 case NE -> {
+                    if (visualDirection == SW || visualDirection == S || visualDirection == W)
+                        visualDirection = SW;
+                    else
+                        visualDirection = NE;
                     hitbox.setX(hitbox.getX() + diag_components_speed * dt);
                     hitbox.setY(hitbox.getY() + diag_components_speed * dt);
                 }
-                case E -> hitbox.setX(hitbox.getX() + movement_speed * dt);
+                case E -> {
+                    if (visualDirection == W || visualDirection == NW || visualDirection == SW)
+                        visualDirection = W;
+                    else
+                        visualDirection = E;
+                    hitbox.setX(hitbox.getX() + movement_speed * dt);
+                }
                 case SE -> {
+                    if (visualDirection == NW || visualDirection == N || visualDirection == W)
+                        visualDirection = NW;
+                    else
+                        visualDirection = SE;
                     hitbox.setX(hitbox.getX() + diag_components_speed * dt);
                     hitbox.setY(hitbox.getY() - diag_components_speed * dt);
                 }
-                case S -> hitbox.setY(hitbox.getY() - movement_speed * dt);
+                case S -> {
+                    if (visualDirection == N || visualDirection == NW || visualDirection == NE)
+                        visualDirection = N;
+                    else
+                        visualDirection = S;
+                    hitbox.setY(hitbox.getY() - movement_speed * dt);
+                }
                 case SW -> {
-                    hitbox.setX(hitbox.getX() - diag_components_speed* dt);
+                    if (visualDirection == NE || visualDirection == N || visualDirection == E)
+                        visualDirection = NE;
+                    else
+                        visualDirection = SW;
+                    hitbox.setX(hitbox.getX() - diag_components_speed * dt);
                     hitbox.setY(hitbox.getY() - diag_components_speed * dt);
                 }
             }

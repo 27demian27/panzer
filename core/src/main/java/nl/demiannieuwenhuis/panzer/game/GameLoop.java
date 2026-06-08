@@ -65,7 +65,7 @@ public class GameLoop implements Runnable {
             playerTank.setStationary(true);
         } else {
             playerTank.setStationary(false);
-            playerTank.setDirection(direction);
+            playerTank.setMoveDirection(direction);
         }
 
         playerTank.cannon.setRotating_direction(computePlayerCannonRotationDirection(playerTank));

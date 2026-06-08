@@ -96,7 +96,7 @@ public class Renderer {
             centerX - (x - tracksSpacingX), centerY - (y + tracksSpacingY),
             tracksWidth, tracksLength,
             1.0f, 1.0f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
 
         // RIGHT TRACK
@@ -106,7 +106,7 @@ public class Renderer {
             centerX - (x + tank_width - tracksSpacingX), centerY - (y + tracksSpacingY),
             tracksWidth, tracksLength,
             1.0f, 1.0f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
 
         float leftTrackX = x - tracksSpacingX;
@@ -119,14 +119,14 @@ public class Renderer {
             centerX - leftTrackX, centerY - leftTrackY,
             tracksWidth, rutLength,
             1f, 1f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
         RectArgs rightTrackRut = new RectArgs(
             rightTrackX, rightTrackY,
             centerX - rightTrackX, centerY - rightTrackY,
             tracksWidth, rutLength,
             1f, 1f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
 
         trackRuts.add(leftTrackRut);
@@ -143,7 +143,7 @@ public class Renderer {
             tank_width / 2.0f, tank_length / 2.0f,
             tank_width, tank_length,
             1.0f, 1.0f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
         shapeRenderer.setColor(new Color(HULL_COLOR).add(0.05f, 0.05f, 0.05f, 1.0f));
         shapeRenderer.rect(
@@ -151,7 +151,7 @@ public class Renderer {
             tank_width / 2.0f - tank_width / 8.0f, tank_length / 2.0f - tank_width / 8.0f,
             tank_width - 2 * (tank_width / 8.0f), tank_length / 6.0f,
             1.0f, 1.0f,
-            Direction8.getRotation(tank.getDirection())
+            Direction8.getRotation(tank.getVisualDirection())
         );
 
 
