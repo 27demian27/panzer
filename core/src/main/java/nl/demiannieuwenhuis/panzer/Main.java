@@ -22,8 +22,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         battleground = new Battleground(1600, 900);
-        battleground.addTank(new Tank(100, 100, 30, 50, 9000, TankInputType.PLAYER));
-        battleground.addTank(new Tank(500, 500, 30, 50, 9000, TankInputType.BOT));
+        battleground.addTank(new Tank(100, 100, 30, 50, 1, TankInputType.PLAYER));
+        battleground.addTank(new Tank(500, 500, 30, 50, 1, TankInputType.BOT));
         renderer = new Renderer(battleground.getTanks().size());
         gameLoop = new GameLoop(battleground, renderer);
         gameThread = Thread.ofPlatform().start(gameLoop);
@@ -33,12 +33,14 @@ public class Main extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(Color.WHITE);
 
-        renderer.renderTiles(battleground);
+        renderer.renderTileSurfaces(battleground);
         if (battleground.getShells() != null) {
             for (Shell shell : battleground.getShells()) {
                 renderer.renderShell(shell);
             }
         }
+
+        renderer.renderTileContents(battleground);
 
         // Big performance hit
 //        renderer.renderTrackRuts();

@@ -21,7 +21,7 @@ public class Tank {
     private final @Getter float movement_speed = 78;
     private final float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
 
-    private @Setter Direction8 direction;
+    private @Getter @Setter Direction8 direction;
 
     private @Getter @Setter boolean stationary;
 
@@ -86,21 +86,6 @@ public class Tank {
                 Math.sin(Math.toRadians(cannon.getAngle() + 90.0f))
             )
             .normalized();
-    }
-
-    // Rotatie hoeken zijn een beetje raar, maar werken zo. LibGDX gedrag.
-    public float getRotation() {
-        return switch (direction) {
-            case W -> 90.0f;
-            case NW -> -315.0f;
-            case N -> 0.0f;
-            case NE -> -45.0f;
-            case E -> 270.0f;
-            case SE -> -135.0f;
-            case S -> 180.0f;
-            case SW -> -225.0f;
-            case null -> 0.0f;
-        };
     }
 
     public void resolveShellHit(Shell shell) {

@@ -8,12 +8,15 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
+import java.lang.reflect.Array;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -21,8 +24,10 @@ public class Renderer {
     public static final Color SAND_COLOR = new Color(0.796f,0.741f,0.576f, 1.0f);
     public static final Color HULL_COLOR = new Color(0.427f, 0.439f, 0.310f, 1.0f);
     public static final Color TURRET_COLOR = new Color(HULL_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
-    public static final Color TRACK_COLOR = Color.DARK_GRAY;
+    public static final Color TRACK_COLOR = new Color(Color.DARK_GRAY);
     public static final Color TRACK_RUTS_COLOR = new Color(SAND_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
+    public static final Color WALL_COLOR = new Color(Color.GRAY);
+
 
     private final @Getter Cursor crosshairCursor;
     private Pixmap crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
@@ -91,7 +96,7 @@ public class Renderer {
             centerX - (x - tracksSpacingX), centerY - (y + tracksSpacingY),
             tracksWidth, tracksLength,
             1.0f, 1.0f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
 
         // RIGHT TRACK
@@ -101,7 +106,7 @@ public class Renderer {
             centerX - (x + tank_width - tracksSpacingX), centerY - (y + tracksSpacingY),
             tracksWidth, tracksLength,
             1.0f, 1.0f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
 
         float leftTrackX = x - tracksSpacingX;
@@ -114,14 +119,14 @@ public class Renderer {
             centerX - leftTrackX, centerY - leftTrackY,
             tracksWidth, rutLength,
             1f, 1f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
         RectArgs rightTrackRut = new RectArgs(
             rightTrackX, rightTrackY,
             centerX - rightTrackX, centerY - rightTrackY,
             tracksWidth, rutLength,
             1f, 1f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
 
         trackRuts.add(leftTrackRut);
@@ -138,7 +143,7 @@ public class Renderer {
             tank_width / 2.0f, tank_length / 2.0f,
             tank_width, tank_length,
             1.0f, 1.0f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
         shapeRenderer.setColor(new Color(HULL_COLOR).add(0.05f, 0.05f, 0.05f, 1.0f));
         shapeRenderer.rect(
@@ -146,7 +151,7 @@ public class Renderer {
             tank_width / 2.0f - tank_width / 8.0f, tank_length / 2.0f - tank_width / 8.0f,
             tank_width - 2 * (tank_width / 8.0f), tank_length / 6.0f,
             1.0f, 1.0f,
-            tank.getRotation()
+            Direction8.getRotation(tank.getDirection())
         );
 
 
@@ -209,7 +214,7 @@ public class Renderer {
         shapeRenderer.end();
     }
 
-    public void renderTiles(Battleground battleground) {
+    public void renderTileSurfaces(Battleground battleground) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         Tile[][] tileGrid = battleground.getTileGrid();
@@ -226,6 +231,45 @@ public class Renderer {
         }
 
         shapeRenderer.end();
+    }
+
+    public void renderTileContents(Battleground battleground) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        Tile[][] tileGrid = battleground.getTileGrid();
+        for (int i = 0; i < tileGrid.length; i++) {
+            for (int j = 0; j < tileGrid[i].length; j++) {
+                renderTileContent(
+                    j * Battleground.TILE_SIZE,
+                    i * Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE,
+                    tileGrid[i][j]
+                );
+            }
+        }
+
+        shapeRenderer.end();
+    }
+
+    private void renderTileContent(float x, float y, float width, float height, Tile tile) {
+        if (tile.contentType == null) return;
+
+        if (tile.contentType == ContentType.WALL) {
+            renderWall(x, y, width, height);
+        }
+    }
+
+    private void renderWall(float x, float y, float width, float height) {
+        float centerX = x + width / 2.0f;
+        float centerY = y + height / 2.0f;
+        shapeRenderer.setColor(WALL_COLOR);
+        shapeRenderer.rect(
+            centerX - Battleground.WALL_THICKNESS / 2.0f,
+            centerY - Battleground.WALL_THICKNESS / 2.0f,
+            Battleground.WALL_THICKNESS,
+            Battleground.WALL_THICKNESS
+        );
     }
 
     private static Color getTerrainColor(SurfaceType surfaceType) {

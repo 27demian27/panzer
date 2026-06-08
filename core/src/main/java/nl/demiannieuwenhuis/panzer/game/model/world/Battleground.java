@@ -1,12 +1,14 @@
 package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.Getter;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.physics.util.CollisionData;
 import nl.demiannieuwenhuis.physics.util.Collisions;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -16,7 +18,8 @@ public class Battleground {
     private final float width;
     private final float height;
 
-    public static final float TILE_SIZE = 50;
+    public static final float TILE_SIZE = 20;
+    public static final float WALL_THICKNESS = TILE_SIZE;
     private final Tile[][] tileGrid;
 
     private final List<Tank> playerTanks = new CopyOnWriteArrayList<>();
@@ -36,12 +39,15 @@ public class Battleground {
     }
 
     private void initializeTileGrid() {
+        ContentType contentType = null;
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
+                contentType = null;
+                if (i == 2 || j == 2) contentType = ContentType.WALL;
                 if (i < 2 * tileGrid.length / 5 || i > 3 * tileGrid.length / 5)
-                    tileGrid[i][j] = new Tile(SurfaceType.SAND, null);
+                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.SAND, contentType, null);
                 else
-                    tileGrid[i][j] = new Tile(SurfaceType.TARMAC, null);
+                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.TARMAC,contentType,  null);
             }
         }
     }
@@ -64,6 +70,19 @@ public class Battleground {
                 shell.hitbox.getY() < 0 ||
                 shell.hitbox.getY() >= height
         );
+    }
+
+    public void resolveWallCollisions() {
+        for (Tank tank : tanks) {
+            for (Tile[] tiles : List.of(tileGrid)) {
+                for (Tile tile : List.of(tiles)) {
+                    if (tile.contentType == ContentType.WALL) {
+                        CollisionData collisionData = Collisions.rectRect(tank.hitbox, tile.getHitBox());
+                        Collisions.correctPosition(tank.hitbox, tile.getHitBox(), collisionData);
+                    }
+                }
+            }
+        }
     }
 
     public void clampTankPos(Tank tank) {
