@@ -4,10 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
-import nl.demiannieuwenhuis.panzer.game.model.Battleground;
-import nl.demiannieuwenhuis.panzer.game.model.Shell;
-import nl.demiannieuwenhuis.panzer.game.model.Direction8;
-import nl.demiannieuwenhuis.panzer.game.model.Tank;
+import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
 public class GameLoop implements Runnable {

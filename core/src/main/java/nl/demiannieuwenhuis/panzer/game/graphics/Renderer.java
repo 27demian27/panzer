@@ -8,20 +8,21 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import nl.demiannieuwenhuis.panzer.game.model.Shell;
-import nl.demiannieuwenhuis.panzer.game.model.Tank;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
+import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
-import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Renderer {
-    public static final Color TERRAIN_COLOR = new Color(0.796f,0.741f,0.576f, 1.0f);
+    public static final Color SAND_COLOR = new Color(0.796f,0.741f,0.576f, 1.0f);
     public static final Color HULL_COLOR = new Color(0.427f, 0.439f, 0.310f, 1.0f);
     public static final Color TURRET_COLOR = new Color(HULL_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
     public static final Color TRACK_COLOR = Color.DARK_GRAY;
-    public static final Color TRACK_RUTS_COLOR = new Color(TERRAIN_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
+    public static final Color TRACK_RUTS_COLOR = new Color(SAND_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
 
     private final @Getter Cursor crosshairCursor;
     private Pixmap crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
@@ -206,6 +207,34 @@ public class Renderer {
             a += 1f / MAX_RUTS;
         }
         shapeRenderer.end();
+    }
+
+    public void renderTiles(Battleground battleground) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        Tile[][] tileGrid = battleground.getTileGrid();
+        for (int i = 0; i < tileGrid.length; i++) {
+            for (int j = 0; j < tileGrid[i].length; j++) {
+                shapeRenderer.setColor(getTerrainColor(tileGrid[i][j].surfaceType));
+                shapeRenderer.rect(
+                    i * Battleground.TILE_SIZE,
+                    j * Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE
+                );
+            }
+        }
+
+        shapeRenderer.end();
+    }
+
+    private static Color getTerrainColor(SurfaceType surfaceType) {
+        return switch (surfaceType) {
+            case GRASS -> new Color(0.553f, 0.702f, 0.427f, 1.0f);
+            case SAND -> new Color(0.796f,0.741f,0.576f, 1.0f);
+            case TARMAC -> new Color(0.549f, 0.549f, 0.549f, 1.0f);
+            case null -> new Color(Color.WHITE);
+        };
     }
 
     public void updateCrosshair() {

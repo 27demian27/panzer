@@ -1,6 +1,6 @@
 package nl.demiannieuwenhuis.panzer.game.ai;
 
-import nl.demiannieuwenhuis.panzer.game.model.Direction8;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 
 public record BotInstruction(
     float duration,

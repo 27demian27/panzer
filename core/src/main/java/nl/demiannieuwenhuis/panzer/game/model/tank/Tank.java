@@ -1,4 +1,4 @@
-package nl.demiannieuwenhuis.panzer.game.model;
+package nl.demiannieuwenhuis.panzer.game.model.tank;
 
 import lombok.Getter;
 import lombok.Setter;

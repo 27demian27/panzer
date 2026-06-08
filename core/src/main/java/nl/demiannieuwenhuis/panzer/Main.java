@@ -1,13 +1,14 @@
 package nl.demiannieuwenhuis.panzer;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
-import nl.demiannieuwenhuis.panzer.game.model.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
-import nl.demiannieuwenhuis.panzer.game.model.Shell;
-import nl.demiannieuwenhuis.panzer.game.model.Tank;
-import nl.demiannieuwenhuis.panzer.game.model.TankInputType;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
+import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -30,8 +31,9 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        ScreenUtils.clear(Renderer.TERRAIN_COLOR);
+        ScreenUtils.clear(Color.WHITE);
 
+        renderer.renderTiles(battleground);
         if (battleground.getShells() != null) {
             for (Shell shell : battleground.getShells()) {
                 renderer.renderShell(shell);

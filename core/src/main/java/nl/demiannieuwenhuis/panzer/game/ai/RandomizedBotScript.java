@@ -1,7 +1,7 @@
 package nl.demiannieuwenhuis.panzer.game.ai;
 
-import nl.demiannieuwenhuis.panzer.game.model.Direction8;
-import nl.demiannieuwenhuis.panzer.game.model.Tank;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 
 import java.util.Random;
 

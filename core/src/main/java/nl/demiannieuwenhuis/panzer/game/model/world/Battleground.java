@@ -1,12 +1,13 @@
-package nl.demiannieuwenhuis.panzer.game.model;
+package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.Getter;
+import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.physics.util.CollisionData;
 import nl.demiannieuwenhuis.physics.util.Collisions;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Getter
@@ -14,6 +15,9 @@ public class Battleground {
 
     private final float width;
     private final float height;
+
+    public static final float TILE_SIZE = 50;
+    private final Tile[][] tileGrid;
 
     private final List<Tank> playerTanks = new CopyOnWriteArrayList<>();
     private final List<Tank> botTanks = new CopyOnWriteArrayList<>();
@@ -23,6 +27,23 @@ public class Battleground {
     public Battleground(float width, float height) {
         this.width = width;
         this.height = height;
+
+        int rows = (int) Math.ceil(width / TILE_SIZE);
+        int cols = (int) Math.ceil(height / TILE_SIZE);
+
+        this.tileGrid = new Tile[rows][cols];
+        initializeTileGrid();
+    }
+
+    private void initializeTileGrid() {
+        for (int i = 0; i < tileGrid.length; i++) {
+            for (int j = 0; j < tileGrid[i].length; j++) {
+                if (i < 2 * tileGrid.length / 5 || i > 3 * tileGrid.length / 5)
+                    tileGrid[i][j] = new Tile(SurfaceType.SAND, null);
+                else
+                    tileGrid[i][j] = new Tile(SurfaceType.TARMAC, null);
+            }
+        }
     }
 
     public void resolveShellHits() {
