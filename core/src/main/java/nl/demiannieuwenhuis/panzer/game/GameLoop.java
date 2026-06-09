@@ -3,6 +3,7 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
+import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
@@ -50,7 +51,9 @@ public class GameLoop implements Runnable {
 
     private void updateBots() {
         for (Tank bot : battleground.getBotTanks()) {
-            bot.getBotScript().execute(MAX_GAME_UPDATE_TIME);
+            BotScript botScript = bot.getBotScript();
+            if (botScript != null)
+                botScript.execute(MAX_GAME_UPDATE_TIME);
         }
     }
 
@@ -68,7 +71,9 @@ public class GameLoop implements Runnable {
             playerTank.setMoveDirection(direction);
         }
 
-        playerTank.cannon.setRotating_direction(computePlayerCannonRotationDirection(playerTank));
+        playerTank.cannon.setRotating_direction(Tank.computeCannonRotationDirection(
+            playerTank, new Vector2D(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
+        );
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             boolean shot = playerTank.cannon.tryShoot();
@@ -77,28 +82,6 @@ public class GameLoop implements Runnable {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             pause();
         }
-    }
-
-    private short computePlayerCannonRotationDirection(Tank playerTank) {
-        Vector2D mousePointer = new Vector2D(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-        Vector2D cannonOrigin = new Vector2D(playerTank.hitbox.getCenterOfMass());
-        float mouseAngle = (float) (mousePointer.subtract(cannonOrigin).angle() * (180 / Math.PI)) - 90.0f;
-
-        float diff = mouseAngle - playerTank.cannon.getAngle();
-
-        while (diff > 180) diff -= 360;
-        while (diff < -180) diff += 360;
-
-
-        if (diff > -4.0f && diff < 4.0f)
-            return 0;
-
-        if (diff > 0)
-            return 1;
-        if (diff < 0)
-            return -1;
-
-        return 0;
     }
 
     private Direction8 computePlayerDirection() {

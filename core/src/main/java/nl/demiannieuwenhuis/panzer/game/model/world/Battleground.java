@@ -39,7 +39,7 @@ public class Battleground {
     }
 
     private void initializeTileGrid() {
-        ContentType contentType = null;
+        ContentType contentType;
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
                 contentType = null;

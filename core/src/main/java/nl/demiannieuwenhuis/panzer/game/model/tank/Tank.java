@@ -2,8 +2,10 @@ package nl.demiannieuwenhuis.panzer.game.model.tank;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.ai.RandomizedBotScript;
+import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
@@ -18,10 +20,10 @@ public class Tank {
     private float current_health = max_health;
 
     private final @Getter TankInputType inputType;
-    private @Getter BotScript botScript;
+    private @Getter @Setter BotScript botScript;
 
     private final @Getter float movement_speed = 78;
-    private final float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
+    private final @Getter float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
 
     private @Getter @Setter Direction8 moveDirection;
     private @Getter @Setter Direction8 visualDirection;
@@ -36,8 +38,8 @@ public class Tank {
         this.visualDirection = moveDirection;
         this.stationary = true;
 
-        if (inputType.equals(TankInputType.BOT))
-            botScript = new RandomizedBotScript(this);
+        if (inputType.equals(TankInputType.BOT)) ;
+
     }
 
     public void update(float dt) {
@@ -123,6 +125,27 @@ public class Tank {
             new Circle(10, hitbox.getCenterOfMass().x, hitbox.getCenterOfMass().y, cannon.getShell_size())
         );
 
+    }
+
+    public static short computeCannonRotationDirection(Tank tank, Vector2D desiredPoint) {
+        Vector2D cannonOrigin = new Vector2D(tank.hitbox.getCenterOfMass());
+        float angle = (float) (desiredPoint.subtract(cannonOrigin).angle() * (180 / Math.PI)) - 90.0f;
+
+        float diff = angle - tank.cannon.getAngle();
+
+        while (diff > 180) diff -= 360;
+        while (diff < -180) diff += 360;
+
+
+        if (diff > -4.0f && diff < 4.0f)
+            return 0;
+
+        if (diff > 0)
+            return 1;
+        if (diff < 0)
+            return -1;
+
+        return 0;
     }
 
     private Vector2D getCannonDirection() {

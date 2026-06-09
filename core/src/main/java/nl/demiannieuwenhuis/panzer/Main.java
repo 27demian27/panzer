@@ -3,6 +3,7 @@ package nl.demiannieuwenhuis.panzer;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
+import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
@@ -24,6 +25,9 @@ public class Main extends ApplicationAdapter {
         battleground = new Battleground(1600, 900);
         battleground.addTank(new Tank(100, 100, 30, 50, 1, TankInputType.PLAYER));
         battleground.addTank(new Tank(500, 500, 30, 50, 1, TankInputType.BOT));
+        battleground.getBotTanks().getFirst().setBotScript(
+            new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
+        );
         renderer = new Renderer(battleground.getTanks().size());
         gameLoop = new GameLoop(battleground, renderer);
         gameThread = Thread.ofPlatform().start(gameLoop);
