@@ -1,18 +1,21 @@
-package nl.demiannieuwenhuis.panzer;
+package nl.demiannieuwenhuis.panzer.game.ui;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
+import nl.demiannieuwenhuis.panzer.game.GameLoop;
+import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
-import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
-import nl.demiannieuwenhuis.panzer.game.GameLoop;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
+import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class Main extends ApplicationAdapter {
+public class GameScreen implements Screen {
+
+    private final Panzer game;
+
     private Battleground battleground;
 
     private Renderer renderer;
@@ -20,8 +23,9 @@ public class Main extends ApplicationAdapter {
     private GameLoop gameLoop;
     private Thread gameThread;
 
-    @Override
-    public void create() {
+    public GameScreen(Panzer game) {
+        this.game = game;
+
         battleground = new Battleground(1600, 900);
         battleground.addTank(new Tank(100, 100, 30, 50, 1, TankInputType.PLAYER));
         battleground.addTank(new Tank(500, 500, 30, 50, 1, TankInputType.BOT));
@@ -34,7 +38,7 @@ public class Main extends ApplicationAdapter {
     }
 
     @Override
-    public void render() {
+    public void render(float delta) {
         ScreenUtils.clear(Color.WHITE);
 
         renderer.renderTileSurfaces(battleground);
@@ -56,17 +60,26 @@ public class Main extends ApplicationAdapter {
         }
 
         renderer.updateCrosshair();
+
+        if (!gameLoop.isRunning())
+            game.setScreen(new MainMenuScreen(game));
     }
 
-
+    @Override public void pause() {
+        gameLoop.pause();
+    }
+    
     @Override
     public void dispose() {
         renderer.dispose();
-        try {
-            gameLoop.stop();
-            gameThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
     }
+
+    @Override public void show() {}
+    @Override public void resize(int width, int height) {}
+    @Override public void hide() {}
+    @Override public void resume() {}
+
+
+
 }

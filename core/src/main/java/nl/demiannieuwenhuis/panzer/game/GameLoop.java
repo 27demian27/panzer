@@ -3,6 +3,7 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
+import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
@@ -18,7 +19,7 @@ public class GameLoop implements Runnable {
     private final Battleground battleground;
 
     private final Renderer renderer;
-    private boolean running = false;
+    private @Getter boolean running = false;
 
     private boolean stopped = false;
 
@@ -81,6 +82,7 @@ public class GameLoop implements Runnable {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             pause();
+            stop();  // TODO: PAUSE MENU
         }
     }
 
