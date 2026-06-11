@@ -33,6 +33,7 @@ public class GameLoop implements Runnable {
         running = true;
         Gdx.graphics.setCursor(renderer.getCrosshairCursor());
         try {
+            Thread.sleep(100);
             while (!stopped) {
                 if (running) {
                     handleControls();
