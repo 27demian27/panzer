@@ -1,12 +1,12 @@
 package nl.demiannieuwenhuis.panzer.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Vector4;
 import lombok.Getter;
-import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+
+import java.util.*;
 
 public class WorldEditor {
 
@@ -19,28 +19,51 @@ public class WorldEditor {
 
     private @Getter boolean stopped;
 
-    private @Getter Tile highlightedTile;
+    private @Getter Set<Tile> selectedTiles;
 
     public WorldEditor(Battleground battleground, Renderer renderer) {
         this.battleground = battleground;
         this.renderer = renderer;
+        selectedTiles = new HashSet<>();
     }
 
-    
-    public void highlightTile(float x, float y) {
+
+    public void selectTile(float x, float y) {
         battleground.findTile(x, y).ifPresent(
             tile -> {
-                if (highlightedTile != null)
-                    highlightedTile.setHighlighted(false);
-                if (tile != highlightedTile) {
-                    highlightedTile = tile;
-                    highlightedTile.setHighlighted(true);
-                } else {
-                    highlightedTile.setHighlighted(false);
-                    highlightedTile = null;
+                if (selectedTiles.contains(tile)) {
+                    tile.setSelected(false);
+                    selectedTiles.remove(tile);
+                }
+                else {
+                    selectedTiles.clear();
+                    tile.setSelected(true);
+                    selectedTiles.add(tile);
                 }
             }
         );
+    }
+
+    public void addTileSelection(float x, float y) {
+        battleground.findTile(x, y).ifPresent(tile -> selectedTiles.add(tile));
+    }
+
+    public void setTileSelection(float x1, float y1, float x2, float y2) {
+        selectedTiles.clear();
+        if (x1 > x2) { float tmp = x1; x1 = x2; x2 = tmp; }
+        if (y1 > y2) { float tmp = y1; y1 = y2; y2 = tmp; }
+
+        int tileX1 = (int) Math.floor(x1 / Battleground.TILE_SIZE);
+        int tileY1 = (int) Math.floor(y1 / Battleground.TILE_SIZE);
+        int tileX2 = (int) Math.floor(x2 / Battleground.TILE_SIZE);
+        int tileY2 = (int) Math.floor(y2 / Battleground.TILE_SIZE);
+
+        for (int tx = tileX1; tx < tileX2; tx++) {
+            for (int ty = tileY1; ty < tileY2; ty++) {
+                battleground.findTile(tx * Battleground.TILE_SIZE, ty * Battleground.TILE_SIZE)
+                    .ifPresent(tile -> selectedTiles.add(tile));
+            }
+        }
     }
 
     public void stop() {

@@ -12,7 +12,7 @@ public class Tile {
     public final ContentType contentType;
     public final Direction8 orientation;
 
-    private @Getter @Setter boolean highlighted;
+    private @Getter @Setter boolean selected;
 
     public Tile(float x, float y, SurfaceType surfaceType, ContentType contentType, Direction8 orientation) {
         this.x = x;
@@ -20,7 +20,7 @@ public class Tile {
         this.surfaceType = surfaceType;
         this.contentType = contentType;
         this.orientation = orientation;
-        this.highlighted = false;
+        this.selected = false;
     }
 
     public Rect getHitBox() {

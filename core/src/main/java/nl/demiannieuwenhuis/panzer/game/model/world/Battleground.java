@@ -51,7 +51,7 @@ public class Battleground {
         int i = (int) Math.floor(x / TILE_SIZE);
         int j = (int) Math.floor(y / TILE_SIZE);
 
-        if (i >= tileGrid.length || j>= tileGrid[i].length)
+        if (i < 0 || j < 0 || i >= tileGrid.length || j>= tileGrid[i].length)
             return Optional.empty();
 
         return Optional.of(tileGrid[i][j]);

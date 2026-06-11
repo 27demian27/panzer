@@ -25,8 +25,9 @@ public class WorldEditorScreen implements Screen {
     private final Battleground battleground;
     private Renderer renderer;
     private WorldEditor worldEditor;
-    private boolean panning;
+    private boolean panning, areaMultiSelecting, selectionDrawing;
     private float lastMouseX, lastMouseY;
+    private float multiselectOriginX, multiselectOriginY;
 
     public WorldEditorScreen(Panzer game) {
         this.game = game;
@@ -41,16 +42,20 @@ public class WorldEditorScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+                if (button == Input.Buttons.LEFT) {
+                    Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
+                    worldEditor.selectTile(worldPos.x, worldPos.y);
+                    multiselectOriginX = worldPos.x;
+                    multiselectOriginY = worldPos.y;
+                    if (!areaMultiSelecting)
+                        selectionDrawing = true;
+                }
+
                 if (button == Input.Buttons.RIGHT) {
                     panning = true;
                     lastMouseX = screenX;
                     lastMouseY = screenY;
-                    System.out.println("start panning.");
-                }
-
-                if (button == Input.Buttons.LEFT) {
-                    Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
-                    worldEditor.highlightTile(worldPos.x, worldPos.y);
                 }
 
                 return true;
@@ -58,16 +63,41 @@ public class WorldEditorScreen implements Screen {
 
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+                if ( button == Input.Buttons.LEFT) {
+                    selectionDrawing = false;
+                }
+
                 if (button == Input.Buttons.RIGHT) {
                     panning = false;
-                    System.out.println("stop panning.");
-
                 }
+
+                return true;
+            }
+
+            @Override
+            public boolean keyDown(int keycode) {
+
+                if (keycode == Input.Keys.SHIFT_LEFT || keycode == Input.Keys.SHIFT_RIGHT) {
+                    areaMultiSelecting = true;
+                }
+
+                return true;
+            }
+
+            @Override
+            public boolean keyUp(int keycode) {
+
+                if (keycode == Input.Keys.SHIFT_LEFT || keycode == Input.Keys.SHIFT_RIGHT) {
+                    areaMultiSelecting = false;
+                }
+
                 return true;
             }
 
             @Override
             public boolean scrolled(float amountX, float amountY) {
+
                 Vector3 before = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
                 camera.zoom = MathUtils.clamp(camera.zoom + amountY * ZOOM_SPEED, MAX_ZOOM, MIN_ZOOM);
@@ -77,11 +107,13 @@ public class WorldEditorScreen implements Screen {
 
                 camera.position.add(before.x - after.x, before.y - after.y, 0);
                 camera.update();
+
                 return true;
             }
 
             @Override
             public boolean touchDragged (int screenX, int screenY, int pointer) {
+
                 if (panning) {
                     float dx = screenX - lastMouseX;
                     float dy = screenY - lastMouseY;
@@ -90,6 +122,14 @@ public class WorldEditorScreen implements Screen {
 
                     lastMouseX = screenX;
                     lastMouseY = screenY;
+                }
+                else if (selectionDrawing) {
+                    Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
+                    worldEditor.addTileSelection(worldPos.x, worldPos.y);
+                }
+                else if (areaMultiSelecting) {
+                    Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
+                    worldEditor.setTileSelection(multiselectOriginX, multiselectOriginY, worldPos.x, worldPos.y);
                 }
 
                 return true;
@@ -104,7 +144,9 @@ public class WorldEditorScreen implements Screen {
 
         renderer.renderTileSurfaces(battleground);
         renderer.renderTileContents(battleground);
-        renderer.renderTileOutlines(battleground, worldEditor);
+        renderer.renderTilesSelection(battleground, worldEditor);
+        renderer.renderTileOutlines(battleground, panning);
+
 
 
     }

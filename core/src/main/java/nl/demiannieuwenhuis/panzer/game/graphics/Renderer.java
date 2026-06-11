@@ -19,7 +19,9 @@ import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
 import java.lang.reflect.Array;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 public class Renderer {
     public static final Color SAND_COLOR = new Color(0.796f,0.741f,0.576f, 1.0f);
@@ -216,9 +218,13 @@ public class Renderer {
         shapeRenderer.end();
     }
 
-    public void renderTileOutlines(Battleground battleground, WorldEditor worldEditor) {
+    public void renderTileOutlines(Battleground battleground, boolean panning) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.setColor(
+            panning ?
+                new Color(Color.BLACK).sub(0, 0, 0, 0.95f) :
+                new Color(Color.BLACK).sub(0, 0, 0, 0.9f)
+        );
 
         Tile[][] tileGrid = battleground.getTileGrid();
         for (int i = 0; i < tileGrid.length; i++) {
@@ -232,18 +238,21 @@ public class Renderer {
             }
         }
         shapeRenderer.end();
+    }
 
+    public void renderTilesSelection(Battleground battleground, WorldEditor worldEditor) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        Tile highlightedTile = worldEditor.getHighlightedTile();
-        if (highlightedTile != null) {
+        Set<Tile> selectedTiles = worldEditor.getSelectedTiles();
+
+        if (!selectedTiles.isEmpty())
             shapeRenderer.setColor(new Color(Color.BLUE).sub(0, 0, 0, 0.5f));
-            shapeRenderer.rect(
-                (float) highlightedTile.getHitBox().getY(),
-                (float) highlightedTile.getHitBox().getX(),
-                Battleground.TILE_SIZE,
-                Battleground.TILE_SIZE
-            );
-        }
+
+        selectedTiles.forEach(tile -> shapeRenderer.rect(
+            (float) tile.getHitBox().getY(),
+            (float) tile.getHitBox().getX(),
+            Battleground.TILE_SIZE,
+            Battleground.TILE_SIZE
+        ));
         shapeRenderer.end();
     }
 
