@@ -66,9 +66,9 @@ public class GameScreen implements Screen {
     }
 
     @Override public void pause() {
-        gameLoop.pause();
+        gameLoop.stop();
     }
-    
+
     @Override
     public void dispose() {
         renderer.dispose();

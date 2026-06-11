@@ -6,6 +6,8 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -25,11 +27,11 @@ public class MainMenuScreen implements Screen {
         this.stage = new Stage(new ScreenViewport(), game.batch);
         Gdx.input.setInputProcessor(stage);
 
-        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
+        stage.addListener(new InputListener() {
 
             @Override
-            public boolean keyDown(com.badlogic.gdx.scenes.scene2d.InputEvent event, int keycode) {
-                if (keycode == com.badlogic.gdx.Input.Keys.ENTER) {
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ENTER) {
                     game.setScreen(new GameScreen(game));
                     dispose();
                     return true;
@@ -86,7 +88,8 @@ public class MainMenuScreen implements Screen {
         editBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                System.out.println("World edit");
+                game.setScreen(new WorldEditorScreen(game));
+                dispose();
             }
         });
 

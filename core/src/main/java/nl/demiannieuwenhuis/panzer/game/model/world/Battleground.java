@@ -10,6 +10,7 @@ import nl.demiannieuwenhuis.physics.util.Collisions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Getter
@@ -39,17 +40,21 @@ public class Battleground {
     }
 
     private void initializeTileGrid() {
-        ContentType contentType;
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                contentType = null;
-                if (i == 2 || j == 2) contentType = ContentType.WALL;
-                if (i < 2 * tileGrid.length / 5 || i > 3 * tileGrid.length / 5)
-                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.SAND, contentType, null);
-                else
-                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.TARMAC,contentType,  null);
+                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.SAND, null, null);
             }
         }
+    }
+
+    public Optional<Tile> findTile(float x, float y) {
+        int i = (int) Math.floor(x / TILE_SIZE);
+        int j = (int) Math.floor(y / TILE_SIZE);
+
+        if (i >= tileGrid.length || j>= tileGrid[i].length)
+            return Optional.empty();
+
+        return Optional.of(tileGrid[i][j]);
     }
 
     public void resolveShellHits() {

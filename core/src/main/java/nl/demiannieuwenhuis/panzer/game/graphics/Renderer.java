@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
@@ -30,11 +31,11 @@ public class Renderer {
 
 
     private final @Getter Cursor crosshairCursor;
-    private Pixmap crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+    private final Pixmap crosshairPixmap;
 
     private final int MAX_RUTS;
 
-    private final ShapeRenderer shapeRenderer;
+    private @Getter final ShapeRenderer shapeRenderer;
 
     private final Queue<RectArgs> trackRuts;
 
@@ -43,6 +44,7 @@ public class Renderer {
         this.trackRuts = new LinkedList<>();
         MAX_RUTS = 200 * tankCount;
 
+        this.crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
         this.crosshairCursor = createCrosshair();
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -214,6 +216,37 @@ public class Renderer {
         shapeRenderer.end();
     }
 
+    public void renderTileOutlines(Battleground battleground, WorldEditor worldEditor) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.BLACK);
+
+        Tile[][] tileGrid = battleground.getTileGrid();
+        for (int i = 0; i < tileGrid.length; i++) {
+            for (int j = 0; j < tileGrid[i].length; j++) {
+                shapeRenderer.rect(
+                    i * Battleground.TILE_SIZE,
+                    j * Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE,
+                    Battleground.TILE_SIZE
+                );
+            }
+        }
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        Tile highlightedTile = worldEditor.getHighlightedTile();
+        if (highlightedTile != null) {
+            shapeRenderer.setColor(new Color(Color.BLUE).sub(0, 0, 0, 0.5f));
+            shapeRenderer.rect(
+                (float) highlightedTile.getHitBox().getY(),
+                (float) highlightedTile.getHitBox().getX(),
+                Battleground.TILE_SIZE,
+                Battleground.TILE_SIZE
+            );
+        }
+        shapeRenderer.end();
+    }
+
     public void renderTileSurfaces(Battleground battleground) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -229,6 +262,7 @@ public class Renderer {
                 );
             }
         }
+
 
         shapeRenderer.end();
     }
@@ -288,6 +322,7 @@ public class Renderer {
 
     public void dispose() {
         shapeRenderer.dispose();
+        crosshairPixmap.dispose();
     }
 
 }
