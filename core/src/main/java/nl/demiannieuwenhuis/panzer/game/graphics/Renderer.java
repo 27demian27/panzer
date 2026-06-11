@@ -240,7 +240,7 @@ public class Renderer {
         shapeRenderer.end();
     }
 
-    public void renderTilesSelection(Battleground battleground, WorldEditor worldEditor) {
+    public void renderTilesSelection(WorldEditor worldEditor) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         Set<Tile> selectedTiles = worldEditor.getSelectedTiles();
 
@@ -262,7 +262,7 @@ public class Renderer {
         Tile[][] tileGrid = battleground.getTileGrid();
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                shapeRenderer.setColor(getTerrainColor(tileGrid[i][j].surfaceType));
+                shapeRenderer.setColor(getTerrainColor(tileGrid[i][j].getSurfaceType()));
                 shapeRenderer.rect(
                     i * Battleground.TILE_SIZE,
                     j * Battleground.TILE_SIZE,

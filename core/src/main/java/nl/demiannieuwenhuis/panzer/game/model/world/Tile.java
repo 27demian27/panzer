@@ -8,7 +8,7 @@ import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 public class Tile {
 
     private final float x, y;
-    public final SurfaceType surfaceType;
+    private @Getter @Setter SurfaceType surfaceType;
     public final ContentType contentType;
     public final Direction8 orientation;
 
