@@ -2,16 +2,16 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -19,7 +19,9 @@ import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
+import org.w3c.dom.Text;
 
 public class WorldEditorScreen implements Screen {
     private static final float ZOOM_SPEED = 0.1f;
@@ -54,9 +56,13 @@ public class WorldEditorScreen implements Screen {
     }
 
     private void buildUI() {
-        Table table = new Table();
-        table.setFillParent(true);
-        table.bottom().left().pad(10);
+        Table surfaceTable = new Table();
+        surfaceTable.setFillParent(true);
+        surfaceTable.bottom().left().pad(10);
+
+        Table contentTable = new Table();
+        contentTable.setFillParent(true);
+        contentTable.top().left().pad(10);
 
 
         Skin skin = new Skin();
@@ -64,26 +70,51 @@ public class WorldEditorScreen implements Screen {
         BitmapFont font = game.assets.font;
         skin.add("default-font", font);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = font;
-        skin.add("default", labelStyle);
+        TextButton.TextButtonStyle defaultBtnStyle = new TextButton.TextButtonStyle();
+        defaultBtnStyle.font = font;
+        defaultBtnStyle.up = colorDrawable(new Color(1, 1, 1, 0.4f));
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font;
-        skin.add("default", buttonStyle);
 
         for (SurfaceType surfaceType : SurfaceType.values()) {
-            TextButton btn = new TextButton(surfaceType.name(), skin);
-            btn.addListener(new ChangeListener() {
+            TextButton btn = new TextButton(surfaceType.name(), getSurfaceTextButtonStyle(surfaceType, font));
+            btn.addListener(new ClickListener() {
                 @Override
-                public void changed(ChangeEvent event, Actor actor) {
+                public void clicked(InputEvent event, float x, float y) {
                     worldEditor.applySurfaceType(surfaceType);
                 }
             });
-            table.add(btn).pad(4).row();
+            surfaceTable.add(btn).pad(4).minWidth(120).row();
         }
 
-        stage.addActor(table);
+        for (ContentType contentType : ContentType.values()) {
+            TextButton btn = new TextButton(contentType.name(), defaultBtnStyle);
+            btn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    worldEditor.applyTileContent(contentType);
+                }
+            });
+            contentTable.add(btn).pad(4).minWidth(140).row();
+        }
+
+        stage.addActor(contentTable);
+        stage.addActor(surfaceTable);
+    }
+
+    private Drawable colorDrawable(Color fill) {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(fill);
+        pixmap.fill();
+        Texture tex = new Texture(pixmap);
+        pixmap.dispose();
+        return new TextureRegionDrawable(tex);
+    }
+
+    private TextButton.TextButtonStyle getSurfaceTextButtonStyle(SurfaceType surfaceType, BitmapFont font) {
+        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
+        btnStyle.font = font;
+        btnStyle.up   = colorDrawable(surfaceType.getTerrainColor());
+        return btnStyle;
     }
 
     private InputAdapter getEditorControls() {

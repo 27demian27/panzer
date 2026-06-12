@@ -24,12 +24,12 @@ import java.util.Queue;
 import java.util.Set;
 
 public class Renderer {
-    public static final Color SAND_COLOR = new Color(0.796f,0.741f,0.576f, 1.0f);
     public static final Color HULL_COLOR = new Color(0.427f, 0.439f, 0.310f, 1.0f);
     public static final Color TURRET_COLOR = new Color(HULL_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
     public static final Color TRACK_COLOR = new Color(Color.DARK_GRAY);
-    public static final Color TRACK_RUTS_COLOR = new Color(SAND_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
+    public static final Color TRACK_RUTS_COLOR = new Color(Color.BLACK).sub(0, 0, 0, 0.5f);
     public static final Color WALL_COLOR = new Color(Color.GRAY);
+    public static final Color BUSH_COLOR = new Color(0.153f, 0.478f, 0.110f, 0.8f);
 
 
     private final @Getter Cursor crosshairCursor;
@@ -262,7 +262,7 @@ public class Renderer {
         Tile[][] tileGrid = battleground.getTileGrid();
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                shapeRenderer.setColor(getTerrainColor(tileGrid[i][j].getSurfaceType()));
+                shapeRenderer.setColor(tileGrid[i][j].getSurfaceType().getTerrainColor());
                 shapeRenderer.rect(
                     i * Battleground.TILE_SIZE,
                     j * Battleground.TILE_SIZE,
@@ -283,8 +283,8 @@ public class Renderer {
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
                 renderTileContent(
-                    j * Battleground.TILE_SIZE,
                     i * Battleground.TILE_SIZE,
+                    j * Battleground.TILE_SIZE,
                     Battleground.TILE_SIZE,
                     Battleground.TILE_SIZE,
                     tileGrid[i][j]
@@ -301,6 +301,10 @@ public class Renderer {
         if (tile.contentType == ContentType.WALL) {
             renderWall(x, y, width, height);
         }
+
+        if (tile.contentType == ContentType.BUSH) {
+            renderBush(x, y, width, height);
+        }
     }
 
     private void renderWall(float x, float y, float width, float height) {
@@ -315,13 +319,11 @@ public class Renderer {
         );
     }
 
-    private static Color getTerrainColor(SurfaceType surfaceType) {
-        return switch (surfaceType) {
-            case GRASS -> new Color(0.553f, 0.702f, 0.427f, 1.0f);
-            case SAND -> new Color(0.796f,0.741f,0.576f, 1.0f);
-            case TARMAC -> new Color(0.549f, 0.549f, 0.549f, 1.0f);
-            case null -> new Color(Color.WHITE);
-        };
+    private void renderBush(float x, float y, float width, float height) {
+        float centerX = x + width / 2.0f;
+        float centerY = y + height / 2.0f;
+        shapeRenderer.setColor(BUSH_COLOR);
+        shapeRenderer.circle(centerX, centerY, width);
     }
 
     public void updateCrosshair() {

@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector4;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
@@ -69,6 +70,10 @@ public class WorldEditor {
 
     public void applySurfaceType(SurfaceType surfaceType) {
         selectedTiles.forEach(tile -> tile.setSurfaceType(surfaceType));
+    }
+
+    public void applyTileContent(ContentType contentType) {
+        selectedTiles.forEach(tile -> tile.setContentType(contentType));
     }
 
     public void stop() {

@@ -9,7 +9,7 @@ public class Tile {
 
     private final float x, y;
     private @Getter @Setter SurfaceType surfaceType;
-    public final ContentType contentType;
+    public @Getter @Setter ContentType contentType;
     public final Direction8 orientation;
 
     private @Getter @Setter boolean selected;
