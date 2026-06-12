@@ -12,6 +12,8 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class GameLoop implements Runnable {
 
     public final static float MAX_GAME_UPDATE_TIME = 0.017f;
@@ -19,33 +21,32 @@ public class GameLoop implements Runnable {
     private final Battleground battleground;
 
     private final Renderer renderer;
-    private @Getter boolean running = false;
+    private AtomicBoolean running;
 
-    private boolean stopped = false;
+    private AtomicBoolean stopped;
 
     public GameLoop(Battleground battleground, Renderer renderer) {
         this.battleground = battleground;
         this.renderer = renderer;
+        this.running = new AtomicBoolean(false);
+        this.stopped = new AtomicBoolean(false);
     }
 
     @Override
     public void run() {
-        running = true;
+        running.set(true);
         Gdx.graphics.setCursor(renderer.getCrosshairCursor());
         try {
             Thread.sleep(100);
-            while (!stopped) {
-                if (running) {
+            while (!stopped.get()) {
+                if (running.get()) {
                     handleControls();
                     updateBots();
                     updateBattleground();
-                } else {
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                        resume();
-                    }
                 }
                 Thread.sleep((long) (MAX_GAME_UPDATE_TIME * 1000));
             }
+            System.out.println("stopped");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -82,8 +83,7 @@ public class GameLoop implements Runnable {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            pause();
-            stop();  // TODO: PAUSE MENU
+            stop();
         }
     }
 
@@ -123,16 +123,27 @@ public class GameLoop implements Runnable {
     }
 
     public void stop() {
-        this.stopped = true;
+        running.set(false);
+        stopped.set(true);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     }
 
     public void pause() {
-        this.running = false;
+        running.set(false);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     }
 
     public void resume() {
-        this.running = true;
+        if (!stopped.get())
+            running.set(true);
         Gdx.graphics.setCursor(renderer.getCrosshairCursor());
+    }
+
+    public boolean isRunning() {
+        return running.get();
+    }
+
+    public boolean isStopped() {
+        return stopped.get();
     }
 }

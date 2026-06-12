@@ -11,6 +11,7 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
 public class GameScreen implements Screen {
 
@@ -23,7 +24,7 @@ public class GameScreen implements Screen {
     private GameLoop gameLoop;
     private Thread gameThread;
 
-    public GameScreen(Panzer game) {
+    public GameScreen(Panzer game, Tile[][] loadedBattleMap) {
         this.game = game;
 
         battleground = new Battleground(1600, 900);
@@ -32,6 +33,12 @@ public class GameScreen implements Screen {
         battleground.getBotTanks().getFirst().setBotScript(
             new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
         );
+
+        if (loadedBattleMap != null && loadedBattleMap.length > 0 && loadedBattleMap[0].length > 0)
+            battleground.setTileGrid(loadedBattleMap);
+        else
+            battleground.setDefaultTileGrid();
+
         renderer = new Renderer(battleground.getTanks().size());
         gameLoop = new GameLoop(battleground, renderer);
         gameThread = Thread.ofPlatform().start(gameLoop);
@@ -61,11 +68,15 @@ public class GameScreen implements Screen {
 
         renderer.updateCrosshair();
 
-        if (!gameLoop.isRunning())
+        if (gameLoop.isStopped()) {
+            System.out.println("here");
             game.setScreen(new MainMenuScreen(game));
+            dispose();
+        }
     }
 
-    @Override public void pause() {
+    @Override
+    public void pause() {
         gameLoop.stop();
     }
 

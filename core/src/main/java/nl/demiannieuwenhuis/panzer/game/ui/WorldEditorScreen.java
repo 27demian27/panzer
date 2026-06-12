@@ -4,10 +4,8 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -18,10 +16,12 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
-import org.w3c.dom.Text;
+
+import java.io.IOException;
 
 public class WorldEditorScreen implements Screen {
     private static final float ZOOM_SPEED = 0.1f;
@@ -33,7 +33,8 @@ public class WorldEditorScreen implements Screen {
     private Stage stage;
     private Viewport uiViewport;
     private final Battleground battleground;
-    private Renderer renderer;
+    private final Renderer renderer;
+    private final BattleMapWriter battleMapWriter;
     private WorldEditor worldEditor;
     private boolean panning, areaMultiSelecting, selectionDrawing;
     private float lastMouseX, lastMouseY;
@@ -45,12 +46,12 @@ public class WorldEditorScreen implements Screen {
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         battleground = new Battleground(1600, 900);
         renderer = new Renderer(0);
+        battleMapWriter = new BattleMapWriter(battleground.getTileGrid());
         worldEditor = new WorldEditor(battleground, renderer);
 
         uiViewport = new ScreenViewport();
         stage = new Stage(uiViewport);
 
-        Gdx.input.setInputProcessor(new InputMultiplexer(stage, getEditorControls()));
 
         buildUI();
     }
@@ -63,7 +64,6 @@ public class WorldEditorScreen implements Screen {
         Table contentTable = new Table();
         contentTable.setFillParent(true);
         contentTable.top().left().pad(10);
-
 
         Skin skin = new Skin();
 
@@ -97,6 +97,40 @@ public class WorldEditorScreen implements Screen {
             contentTable.add(btn).pad(4).minWidth(140).row();
         }
 
+        TextButton saveBtn = new TextButton("SAVE", defaultBtnStyle);
+        saveBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.log("DEBUG", "Button clicked");
+
+
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    String result = javax.swing.JOptionPane.showInputDialog(
+                        null,
+                        "Stage name:",
+                        "Save Stage",
+                        javax.swing.JOptionPane.PLAIN_MESSAGE
+                    );
+
+                    if (result != null && !result.trim().isEmpty()) {
+                        Gdx.app.postRunnable(() -> {
+                            try {
+                                battleMapWriter.saveStage(result.trim());
+                                Gdx.app.log("SaveStage", "Saved as: " + result.trim());
+                            } catch (IOException e) {
+                                Gdx.app.error("SaveStage", "Failed to save: " + e.getMessage());
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        Table actionsTable = new Table();
+        actionsTable.setFillParent(true);
+        actionsTable.top().right().pad(10);
+        actionsTable.add(saveBtn).pad(4).row();
+
+        stage.addActor(actionsTable);
         stage.addActor(contentTable);
         stage.addActor(surfaceTable);
     }
@@ -160,6 +194,11 @@ public class WorldEditorScreen implements Screen {
 
                 if (keycode == Input.Keys.SHIFT_LEFT || keycode == Input.Keys.SHIFT_RIGHT) {
                     areaMultiSelecting = true;
+                }
+
+                if (keycode == Input.Keys.ESCAPE) {
+                    game.setScreen(new MainMenuScreen(game));
+                    dispose();
                 }
 
                 return true;
@@ -250,7 +289,10 @@ public class WorldEditorScreen implements Screen {
         uiViewport.update(width, height, true);
     }
 
-    @Override public void show() {}
+    @Override public void show() {
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, getEditorControls()));
+    }
+
     @Override public void hide() {}
     @Override public void resume() {}
 

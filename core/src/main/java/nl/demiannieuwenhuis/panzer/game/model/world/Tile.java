@@ -5,7 +5,9 @@ import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 
-public class Tile {
+import java.io.Serializable;
+
+public class Tile implements Serializable {
 
     private final float x, y;
     private @Getter @Setter SurfaceType surfaceType;

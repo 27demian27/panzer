@@ -2,10 +2,10 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,6 +14,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMapLoader;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.io.IOException;
 
 public class MainMenuScreen implements Screen {
 
@@ -21,18 +29,20 @@ public class MainMenuScreen implements Screen {
     private final Stage stage;
     private final Skin skin;
 
+    private Tile[][] loadedBattleMap;
+
     public MainMenuScreen(Panzer game) {
         this.game = game;
 
         this.stage = new Stage(new ScreenViewport(), game.batch);
-        Gdx.input.setInputProcessor(stage);
+        this.loadedBattleMap = null;
 
         stage.addListener(new InputListener() {
 
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 if (keycode == Input.Keys.ENTER) {
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new GameScreen(game, loadedBattleMap));
                     dispose();
                     return true;
                 }
@@ -76,22 +86,57 @@ public class MainMenuScreen implements Screen {
         sub.setColor(0.88f, 0.88f, 0.78f, 1f);
 
         TextButton battleBtn = new TextButton("Battle!", skin);
-        TextButton editBtn = new TextButton("Edit Stage", skin);
+        TextButton editBtn = new TextButton("Edit BattleMap", skin);
+        TextButton loadBattleMapBtn = new TextButton("Load BattleMap", skin);
+        loadBattleMapBtn.setColor(Color.WHITE);
 
         battleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game, loadedBattleMap));
+                dispose();
             }
         });
 
         editBtn.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new WorldEditorScreen(game));
                 dispose();
             }
         });
+
+        loadBattleMapBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                SwingUtilities.invokeLater(() -> {
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.setDialogTitle("Load Battle Map");
+                    chooser.setCurrentDirectory(new File(Gdx.files.getLocalStoragePath() + BattleMapWriter.SAVES_DIR));
+                    chooser.setFileFilter(new FileNameExtensionFilter(
+                        "Battle Map files (.map)", "map"
+                    ));
+
+                    int result = chooser.showOpenDialog(null);
+                    if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+                        File file = chooser.getSelectedFile();
+                        Gdx.app.postRunnable(() -> {
+                            try {
+                                loadedBattleMap = BattleMapLoader.loadBattleMap(file);
+                            } catch (IOException e) {
+                                Gdx.app.error("LoadBattleMap", "Failed: " + e.getMessage());
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        Table actionsTable = new Table();
+        actionsTable.setFillParent(true);
+        actionsTable.top().right().pad(10);
+        actionsTable.add(loadBattleMapBtn).pad(4).row();
+        stage.addActor(actionsTable);
 
         root.add(title).padBottom(20);
         root.row();
@@ -114,7 +159,9 @@ public class MainMenuScreen implements Screen {
         stage.getViewport().update(width, height, true);
     }
 
-    @Override public void show() {}
+    @Override public void show() {
+        Gdx.input.setInputProcessor(stage);
+    }
     @Override public void hide() {}
     @Override public void pause() {}
     @Override public void resume() {}

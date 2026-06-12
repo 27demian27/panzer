@@ -1,6 +1,7 @@
 package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.Getter;
+import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
@@ -21,7 +22,7 @@ public class Battleground {
 
     public static final float TILE_SIZE = 20;
     public static final float WALL_THICKNESS = TILE_SIZE;
-    private final Tile[][] tileGrid;
+    private @Setter Tile[][] tileGrid;
 
     private final List<Tank> playerTanks = new CopyOnWriteArrayList<>();
     private final List<Tank> botTanks = new CopyOnWriteArrayList<>();
@@ -36,10 +37,9 @@ public class Battleground {
         int cols = (int) Math.ceil(height / TILE_SIZE);
 
         this.tileGrid = new Tile[rows][cols];
-        initializeTileGrid();
     }
 
-    private void initializeTileGrid() {
+    public void setDefaultTileGrid() {
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
                     tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.SAND, null, null);
