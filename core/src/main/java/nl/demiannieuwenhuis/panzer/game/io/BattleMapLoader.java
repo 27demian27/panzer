@@ -1,25 +1,27 @@
 package nl.demiannieuwenhuis.panzer.game.io;
 
-import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+
+import com.badlogic.gdx.Gdx;
 
 import java.io.*;
 import java.nio.file.Path;
 
 public class BattleMapLoader {
 
-    public static Tile[][] loadBattleMap(String BattleMapName) throws IOException {
+    public static BattleMap loadBattleMap(String BattleMapName) throws IOException {
         Path saveFile = BattleMapWriter.SAVES_DIR.resolve(BattleMapName);
         return loadBattleMap(saveFile.toFile());
     }
 
-    public static Tile[][] loadBattleMap(File BattleMapFile) throws IOException {
-        if (!BattleMapFile.isFile())
+    public static BattleMap loadBattleMap(File battleMapFile) throws IOException {
+        if (!battleMapFile.isFile())
             throw new FileNotFoundException();
 
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(BattleMapFile))) {
-            return (Tile[][]) inputStream.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(battleMapFile))) {
+            return (BattleMap) inputStream.readObject();
+        } catch (ClassNotFoundException | ClassCastException e) {
+            Gdx.app.log("loadBattleMap", "Could not load: " + battleMapFile.getName(), e);
+            return null;
         }
     }
 

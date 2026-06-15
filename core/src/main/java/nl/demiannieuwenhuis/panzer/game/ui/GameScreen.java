@@ -7,6 +7,7 @@ import nl.demiannieuwenhuis.panzer.game.GameLoop;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
@@ -16,6 +17,7 @@ import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 public class GameScreen implements Screen {
 
     private final Panzer game;
+    private BattleMap loadedBattleMap;
 
     private Battleground battleground;
 
@@ -24,9 +26,9 @@ public class GameScreen implements Screen {
     private GameLoop gameLoop;
     private Thread gameThread;
 
-    public GameScreen(Panzer game, Tile[][] loadedBattleMap) {
+    public GameScreen(Panzer game, BattleMap loadedBattleMap) {
         this.game = game;
-
+        this.loadedBattleMap = loadedBattleMap;
         battleground = new Battleground(1600, 900);
         battleground.addTank(new Tank(100, 100, 30, 50, 1, TankInputType.PLAYER));
         battleground.addTank(new Tank(500, 500, 30, 50, 1, TankInputType.BOT));
@@ -34,8 +36,8 @@ public class GameScreen implements Screen {
             new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
         );
 
-        if (loadedBattleMap != null && loadedBattleMap.length > 0 && loadedBattleMap[0].length > 0)
-            battleground.setTileGrid(loadedBattleMap);
+        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
+            battleground.setTileGrid(loadedBattleMap.tileGrid);
         else
             battleground.setDefaultTileGrid();
 
@@ -70,7 +72,7 @@ public class GameScreen implements Screen {
 
         if (gameLoop.isStopped()) {
             System.out.println("here");
-            game.setScreen(new MainMenuScreen(game));
+            game.setScreen(new MainMenuScreen(game, loadedBattleMap));
             dispose();
         }
     }

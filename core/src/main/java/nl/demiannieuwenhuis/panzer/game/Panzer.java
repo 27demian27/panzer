@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 import nl.demiannieuwenhuis.panzer.game.ui.Assets;
 import nl.demiannieuwenhuis.panzer.game.ui.MainMenuScreen;
 
@@ -26,7 +27,7 @@ public class Panzer extends Game {
         uiStage = new Stage(new ScreenViewport(), batch);
         assets = new Assets();
 
-        this.setScreen(new MainMenuScreen(this));
+        this.setScreen(new MainMenuScreen(this, null));
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
@@ -36,16 +37,24 @@ public class WorldEditorScreen implements Screen {
     private final Renderer renderer;
     private final BattleMapWriter battleMapWriter;
     private WorldEditor worldEditor;
+    private BattleMap loadedBattleMap;
     private boolean panning, areaMultiSelecting, selectionDrawing;
     private float lastMouseX, lastMouseY;
     private float multiselectOriginX, multiselectOriginY;
 
-    public WorldEditorScreen(Panzer game) {
+    public WorldEditorScreen(Panzer game, BattleMap loadedBattleMap) {
         this.game = game;
+        this.loadedBattleMap = loadedBattleMap;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         battleground = new Battleground(1600, 900);
         renderer = new Renderer(0);
+
+        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
+            battleground.setTileGrid(loadedBattleMap.tileGrid);
+        else
+            battleground.setDefaultTileGrid();
+
         battleMapWriter = new BattleMapWriter(battleground.getTileGrid());
         worldEditor = new WorldEditor(battleground, renderer);
 
@@ -107,18 +116,20 @@ public class WorldEditorScreen implements Screen {
                 javax.swing.SwingUtilities.invokeLater(() -> {
                     String result = javax.swing.JOptionPane.showInputDialog(
                         null,
-                        "Stage name:",
-                        "Save Stage",
+                        "Map name:",
+                        "Save Map",
                         javax.swing.JOptionPane.PLAIN_MESSAGE
                     );
 
                     if (result != null && !result.trim().isEmpty()) {
                         Gdx.app.postRunnable(() -> {
                             try {
-                                battleMapWriter.saveStage(result.trim());
-                                Gdx.app.log("SaveStage", "Saved as: " + result.trim());
+                                BattleMap battleMap = new BattleMap(result.trim(), battleground.getTileGrid());
+                                battleMapWriter.saveBattleMap(battleMap);
+                                loadedBattleMap = battleMap;
+                                Gdx.app.log("SaveBattleMap", "Saved as: " + result.trim());
                             } catch (IOException e) {
-                                Gdx.app.error("SaveStage", "Failed to save: " + e.getMessage());
+                                Gdx.app.error("SaveBattleMap", "Failed to save: " + e.getMessage());
                             }
                         });
                     }
@@ -197,7 +208,7 @@ public class WorldEditorScreen implements Screen {
                 }
 
                 if (keycode == Input.Keys.ESCAPE) {
-                    game.setScreen(new MainMenuScreen(game));
+                    game.setScreen(new MainMenuScreen(game, loadedBattleMap));
                     dispose();
                 }
 

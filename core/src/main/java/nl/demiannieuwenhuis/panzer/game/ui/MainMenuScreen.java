@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
+import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapLoader;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
@@ -29,13 +30,14 @@ public class MainMenuScreen implements Screen {
     private final Stage stage;
     private final Skin skin;
 
-    private Tile[][] loadedBattleMap;
+    private BattleMap loadedBattleMap;
+    private Label mapNameLabel;
 
-    public MainMenuScreen(Panzer game) {
+    public MainMenuScreen(Panzer game, BattleMap loadedBattleMap) {
         this.game = game;
 
         this.stage = new Stage(new ScreenViewport(), game.batch);
-        this.loadedBattleMap = null;
+        this.loadedBattleMap = loadedBattleMap;
 
         stage.addListener(new InputListener() {
 
@@ -85,6 +87,10 @@ public class MainMenuScreen implements Screen {
         Label sub = new Label("Select your action.", skin);
         sub.setColor(0.88f, 0.88f, 0.78f, 1f);
 
+        mapNameLabel = new Label("map: " + getMapName(), skin);
+        mapNameLabel.setFontScale(0.7f);
+        mapNameLabel.setColor(Color.GRAY);
+
         TextButton battleBtn = new TextButton("Battle!", skin);
         TextButton editBtn = new TextButton("Edit BattleMap", skin);
         TextButton loadBattleMapBtn = new TextButton("Load BattleMap", skin);
@@ -101,7 +107,7 @@ public class MainMenuScreen implements Screen {
         editBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new WorldEditorScreen(game));
+                game.setScreen(new WorldEditorScreen(game, loadedBattleMap));
                 dispose();
             }
         });
@@ -123,6 +129,7 @@ public class MainMenuScreen implements Screen {
                         Gdx.app.postRunnable(() -> {
                             try {
                                 loadedBattleMap = BattleMapLoader.loadBattleMap(file);
+                                mapNameLabel.setText("map: " + getMapName());
                             } catch (IOException e) {
                                 Gdx.app.error("LoadBattleMap", "Failed: " + e.getMessage());
                             }
@@ -140,11 +147,17 @@ public class MainMenuScreen implements Screen {
 
         root.add(title).padBottom(20);
         root.row();
-        root.add(sub).padBottom(40);
+        root.add(sub).padBottom(20);
         root.row();
-        root.add(battleBtn).width(200).height(60).padBottom(10);
+        root.add(battleBtn).width(200).height(30).padBottom(0);
+        root.row();
+        root.add(mapNameLabel).padBottom(20);
         root.row();
         root.add(editBtn).width(200).height(60);
+    }
+
+    private String getMapName() {
+        return loadedBattleMap == null ? "default" : loadedBattleMap.name;
     }
 
     @Override
