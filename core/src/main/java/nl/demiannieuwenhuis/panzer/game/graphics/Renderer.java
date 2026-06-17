@@ -41,6 +41,9 @@ public class Renderer {
 
     private final Queue<RectArgs> trackRuts;
 
+    public Renderer() {
+        this(1);
+    }
     public Renderer(int tankCount) {
         this.shapeRenderer = new ShapeRenderer();
         this.trackRuts = new LinkedList<>();

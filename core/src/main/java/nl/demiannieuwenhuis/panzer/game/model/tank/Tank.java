@@ -10,9 +10,14 @@ import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import java.io.Serializable;
+
 import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
 
 public class Tank {
+
+    public final int UID;
+
     public final Rect hitbox;
     public final Cannon cannon;
 
@@ -30,7 +35,8 @@ public class Tank {
 
     private @Getter @Setter boolean stationary;
 
-    public Tank(float x, float y, float width, float height, double mass, TankInputType inputType) {
+    public Tank(int UID, float x, float y, float width, float height, double mass, TankInputType inputType) {
+        this.UID = UID;
         this.inputType = inputType;
         this.hitbox = new Rect(mass, x, y, width, height);
         this.cannon = new Cannon(width / 6.0f, height / 2.0f);

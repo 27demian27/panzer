@@ -3,6 +3,8 @@ package nl.demiannieuwenhuis.panzer.game.model.tank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 public class Cannon {
 
     private @Getter final float width;

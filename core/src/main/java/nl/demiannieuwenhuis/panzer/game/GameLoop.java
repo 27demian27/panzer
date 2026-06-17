@@ -3,15 +3,17 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
-import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
+import nl.demiannieuwenhuis.panzer.game.net.ClientConnection;
+import nl.demiannieuwenhuis.panzer.game.net.TankUpdate;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameLoop implements Runnable {
@@ -19,14 +21,23 @@ public class GameLoop implements Runnable {
     public final static float MAX_GAME_UPDATE_TIME = 0.017f;
 
     private final Battleground battleground;
-
+    private final ClientConnection playerClientConnection;
+    private Tank playerTank;
     private final Renderer renderer;
     private AtomicBoolean running;
 
     private AtomicBoolean stopped;
 
-    public GameLoop(Battleground battleground, Renderer renderer) {
+
+    public GameLoop(Battleground battleground, ClientConnection playerClientConnection, Renderer renderer) {
         this.battleground = battleground;
+        this.playerClientConnection = playerClientConnection;
+        if (playerClientConnection == null) {
+            playerTank = battleground.getPlayerTanks().getFirst();
+        } else {
+            playerTank = playerClientConnection.getPlayerTank();
+        }
+
         this.renderer = renderer;
         this.running = new AtomicBoolean(false);
         this.stopped = new AtomicBoolean(false);
@@ -40,14 +51,32 @@ public class GameLoop implements Runnable {
             Thread.sleep(100);
             while (!stopped.get()) {
                 if (running.get()) {
+
                     handleControls();
-                    updateBots();
+
+                    if (playerClientConnection != null) {
+                        updateClients();
+                    } else {
+                        updateBots();
+                    }
+
                     updateBattleground();
                 }
                 Thread.sleep((long) (MAX_GAME_UPDATE_TIME * 1000));
             }
-            System.out.println("stopped");
+            Gdx.app.log("GameLoop", "GameLoop stopped.");
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateClients() {
+        try {
+            playerClientConnection.sendTankPacket();
+            for (int i = 0; i < playerClientConnection.getGameRoomInfo().playerCount(); i++) {
+                TankUpdate tankUpdate = playerClientConnection.receiveTankPacket();
+            }
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -61,10 +90,9 @@ public class GameLoop implements Runnable {
     }
 
     private void handleControls() {
-        if (battleground.getPlayerTanks() == null || battleground.getPlayerTanks().isEmpty())
-            return;
 
-        Tank playerTank = battleground.getPlayerTanks().getFirst();
+        if (playerTank == null)
+            return;
         Direction8 direction = computePlayerDirection();
 
         if (direction == null) {
@@ -125,6 +153,7 @@ public class GameLoop implements Runnable {
     public void stop() {
         running.set(false);
         stopped.set(true);
+        playerClientConnection.close();
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     }
 

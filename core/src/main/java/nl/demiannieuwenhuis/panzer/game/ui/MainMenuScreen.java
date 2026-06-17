@@ -1,7 +1,6 @@
 package nl.demiannieuwenhuis.panzer.game.ui;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -17,12 +16,13 @@ import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapLoader;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
-import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketException;
 
 public class MainMenuScreen implements Screen {
 
@@ -43,12 +43,6 @@ public class MainMenuScreen implements Screen {
 
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
-                if (keycode == Input.Keys.ENTER) {
-                    game.setScreen(new GameScreen(game, loadedBattleMap));
-                    dispose();
-                    return true;
-                }
-
                 if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE) {
                     Gdx.app.exit();
                     return true;
@@ -94,13 +88,16 @@ public class MainMenuScreen implements Screen {
         TextButton battleBtn = new TextButton("Battle!", skin);
         TextButton editBtn = new TextButton("Edit BattleMap", skin);
         TextButton loadBattleMapBtn = new TextButton("Load BattleMap", skin);
+        TextButton createRoomBtn = new TextButton("Create Room", skin);
+        TextButton joinRoomBtn = new TextButton("Join Room", skin);
+
         loadBattleMapBtn.setColor(Color.WHITE);
 
         battleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new GameScreen(game, loadedBattleMap));
-                dispose();
+                startVSAiBattle();
+//                startOnlineBattle();
             }
         });
 
@@ -108,7 +105,6 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new WorldEditorScreen(game, loadedBattleMap));
-                dispose();
             }
         });
 
@@ -139,11 +135,44 @@ public class MainMenuScreen implements Screen {
             }
         });
 
+        createRoomBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.log("MainMenuScreen", "Create Room pressed");
+                    GameRoom gameRoom = new GameRoom(loadedBattleMap);
+                    gameRoom.startControlServer();
+                    gameRoom.startBattleServer();
+                    joinOnlineBattle(gameRoom.code);
+            }
+        });
+
+        joinRoomBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                SwingUtilities.invokeLater(() -> {
+                    String roomCode = JOptionPane.showInputDialog(null, "Enter room code:", "Join Room", JOptionPane.PLAIN_MESSAGE);
+                    if (roomCode != null && !roomCode.trim().isEmpty()) {
+                        Gdx.app.postRunnable(() -> {
+                            Gdx.app.log("MainMenuScreen", "Joining Room with code: " + roomCode.trim() + "...");
+                            joinOnlineBattle(roomCode.trim());
+                        });
+                    }
+                });
+            }
+        });
+
         Table actionsTable = new Table();
         actionsTable.setFillParent(true);
         actionsTable.top().right().pad(10);
         actionsTable.add(loadBattleMapBtn).pad(4).row();
         stage.addActor(actionsTable);
+
+        Table roomTable = new Table();
+        roomTable.setFillParent(true);
+        roomTable.top().left().pad(10);
+        roomTable.add(createRoomBtn).pad(4).row();
+        roomTable.add(joinRoomBtn).pad(4).row();
+        stage.addActor(roomTable);
 
         root.add(title).padBottom(20);
         root.row();
@@ -154,6 +183,16 @@ public class MainMenuScreen implements Screen {
         root.add(mapNameLabel).padBottom(20);
         root.row();
         root.add(editBtn).width(200).height(60);
+    }
+
+    private void startVSAiBattle() {
+        game.setScreen(new GameScreen(game, loadedBattleMap, false, ""));
+        dispose();
+    }
+
+    private void joinOnlineBattle(String roomCode) {
+        game.setScreen(new GameScreen(game, loadedBattleMap, true, roomCode));
+        dispose();
     }
 
     private String getMapName() {
@@ -168,19 +207,23 @@ public class MainMenuScreen implements Screen {
         stage.draw();
     }
 
-    @Override public void resize(int width, int height) {
+    @Override
+    public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
-    @Override public void show() {
+    @Override
+    public void show() {
         Gdx.input.setInputProcessor(stage);
     }
-    @Override public void hide() {}
-    @Override public void pause() {}
-    @Override public void resume() {}
 
     @Override
     public void dispose() {
         stage.dispose();
     }
+
+    @Override public void hide() {}
+    @Override public void pause() {}
+
+    @Override public void resume() {}
 }
