@@ -2,16 +2,11 @@ package nl.demiannieuwenhuis.panzer.game.model.tank;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
-import nl.demiannieuwenhuis.panzer.game.ai.RandomizedBotScript;
-import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
-
-import java.io.Serializable;
 
 import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
 
@@ -22,8 +17,8 @@ public class Tank {
     public final Rect hitbox;
     public final Cannon cannon;
 
-    private float max_health = 100.0f;
-    private float current_health = max_health;
+    private @Getter float max_health = 100.0f;
+    private @Getter float current_health = max_health;
 
     private final @Getter TankInputType inputType;
     private @Getter @Setter BotScript botScript;
@@ -35,6 +30,7 @@ public class Tank {
     private @Getter @Setter Direction8 visualDirection;
 
     private @Getter @Setter boolean stationary;
+    private @Getter boolean disabled;
 
     public Tank(int UID, float x, float y, float width, float height, double mass, TankInputType inputType) {
         this.UID = UID;
@@ -44,7 +40,7 @@ public class Tank {
         this.moveDirection = NONE;
         this.visualDirection = moveDirection;
         this.stationary = true;
-
+        this.disabled = false;
     }
 
     public TankUpdate getUpdateSnapshot() {
@@ -61,6 +57,7 @@ public class Tank {
     }
 
     public void update(float dt) {
+
         if (!stationary) {
             switch (moveDirection) {
                 case NONE -> {}
@@ -127,6 +124,7 @@ public class Tank {
                 }
             }
         }
+
         cannon.update(dt);
     }
 
@@ -176,9 +174,16 @@ public class Tank {
     }
 
     public void resolveShellHit(Shell shell) {
-        System.out.println(this + " HIT!");
         current_health -= shell.getDamage();
-        System.out.println("new health: " + current_health);
+
+        if (current_health <= 0.00f) {
+            disable();
+        }
+    }
+
+    private void disable() {
+        cannon.setRotating_direction((short) 0);
+        disabled = true;
     }
 
 }

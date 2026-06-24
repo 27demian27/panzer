@@ -31,6 +31,8 @@ public class Renderer {
     public static final Color WALL_COLOR = new Color(Color.GRAY);
     public static final Color BUSH_COLOR = new Color(0.153f, 0.478f, 0.110f, 0.8f);
 
+    private final Animator animator;
+
 
     private final @Getter Cursor crosshairCursor;
     private final Pixmap crosshairPixmap;
@@ -46,6 +48,7 @@ public class Renderer {
     }
     public Renderer(int tankCount) {
         this.shapeRenderer = new ShapeRenderer();
+        this.animator = new Animator(shapeRenderer);
         this.trackRuts = new LinkedList<>();
         MAX_RUTS = 200 * tankCount;
 
@@ -72,7 +75,7 @@ public class Renderer {
         );
     }
 
-    public void renderTank(Tank tank) {
+    public void renderTank(Tank tank, float dt) {
         float x = (float) tank.hitbox.getX();
         float y = (float) tank.hitbox.getY();
         float tank_width = (float) tank.hitbox.getWidth();
@@ -180,7 +183,28 @@ public class Renderer {
             tank.cannon.getAngle()
         );
 
+        renderTankHealthBar(tank);
+
+        if (tank.isDisabled())
+            animator.disabledAnimation(tank, dt);
+
         shapeRenderer.end();
+    }
+
+    public void renderTankHealthBar(Tank tank) {
+        float centerX = (float) (tank.hitbox.getX() + tank.hitbox.getWidth() / 2.0f);
+        float centerY = (float) (tank.hitbox.getY() + tank.hitbox.getHeight() / 2.0f);
+        float width = (float) (tank.hitbox.getWidth() * 3.0f);
+        float height = 8.0f;
+        float y = (float) (centerY - tank.hitbox.getHeight());
+        float x = centerX - width / 2;
+
+        shapeRenderer.setColor(new Color(0.573f, 0.122f, 0.122f, 1.0f));
+        shapeRenderer.rect(x, y, width, height);
+
+        float currentHealthBarWidth = Math.max(0, width * (tank.getCurrent_health() / tank.getMax_health()));
+        shapeRenderer.setColor(Color.SCARLET);
+        shapeRenderer.rect(x, y, currentHealthBarWidth, height);
     }
 
     public void renderShell(Shell shell) {

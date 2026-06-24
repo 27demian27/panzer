@@ -151,6 +151,8 @@ public class GameLoop implements Runnable {
 
     private void updateBots() {
         for (Tank bot : battleground.getBotTanks()) {
+            if (bot.isDisabled()) continue;
+
             BotScript botScript = bot.getBotScript();
             if (botScript != null)
                 botScript.execute(MAX_GAME_UPDATE_TIME);
@@ -200,6 +202,8 @@ public class GameLoop implements Runnable {
 
     private void updateBattleground() {
         for (Tank tank : battleground.getTanks()) {
+            if (tank.isDisabled()) continue;
+
             tank.update(MAX_GAME_UPDATE_TIME);
 
             if (tank.cannon.hasShootRequest()) {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
+import nl.demiannieuwenhuis.panzer.game.ai.RandomizedBotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
@@ -61,7 +62,8 @@ public class GameScreen implements Screen {
                 new Tank(battleground.getTanks().size(), 500, 500, 30, 50, 1, TankInputType.BOT)
             );
             battleground.getBotTanks().getFirst().setBotScript(
-                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
+//                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
+                new RandomizedBotScript(battleground.getBotTanks().getFirst())
             );
             gameLoop = new GameLoop(battleground, null, null, renderer);
         }
@@ -86,7 +88,7 @@ public class GameScreen implements Screen {
 
         if (battleground.getTanks() != null) {
             for (Tank tank : battleground.getTanks()) {
-                renderer.renderTank(tank);
+                renderer.renderTank(tank, delta);
             }
         }
 
