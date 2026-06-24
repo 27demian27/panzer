@@ -6,6 +6,7 @@ import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.ai.RandomizedBotScript;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
 import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
@@ -40,17 +41,29 @@ public class Tank {
         this.inputType = inputType;
         this.hitbox = new Rect(mass, x, y, width, height);
         this.cannon = new Cannon(width / 6.0f, height / 2.0f);
-        this.moveDirection = null;
+        this.moveDirection = NONE;
         this.visualDirection = moveDirection;
         this.stationary = true;
 
-        if (inputType.equals(TankInputType.BOT)) ;
+    }
 
+    public TankUpdate getUpdateSnapshot() {
+        return new TankUpdate(
+            UID,
+            (float) hitbox.getX(),
+            (float) hitbox.getY(),
+            moveDirection,
+            visualDirection,
+            cannon.getAngle(),
+            cannon.hasShootRequest(),
+            stationary
+        );
     }
 
     public void update(float dt) {
         if (!stationary) {
             switch (moveDirection) {
+                case NONE -> {}
                 case W -> {
                     if (visualDirection == E || visualDirection == NE || visualDirection == SE)
                         visualDirection = E;

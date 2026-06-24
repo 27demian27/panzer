@@ -3,35 +3,51 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
+import lombok.Getter;
+import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
+import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
-import nl.demiannieuwenhuis.panzer.game.net.ClientConnection;
-import nl.demiannieuwenhuis.panzer.game.net.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.server.BattleServer;
+import nl.demiannieuwenhuis.panzer.game.net.client.ClientConnection;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameLoop implements Runnable {
 
     public final static float MAX_GAME_UPDATE_TIME = 0.017f;
+    private static final float POSITION_INTERPOLATION_FACTOR = 0.10f;
 
     private final Battleground battleground;
     private final ClientConnection playerClientConnection;
-    private Tank playerTank;
+    private final BattleServer battleServer;
+    private final Tank playerTank;
     private final Renderer renderer;
     private AtomicBoolean running;
 
     private AtomicBoolean stopped;
 
 
-    public GameLoop(Battleground battleground, ClientConnection playerClientConnection, Renderer renderer) {
+    public GameLoop(
+        Battleground battleground,
+        ClientConnection playerClientConnection,
+        BattleServer battleServer,
+        Renderer renderer
+    ) {
         this.battleground = battleground;
         this.playerClientConnection = playerClientConnection;
+        this.battleServer = battleServer;
         if (playerClientConnection == null) {
             playerTank = battleground.getPlayerTanks().getFirst();
         } else {
@@ -73,11 +89,63 @@ public class GameLoop implements Runnable {
     private void updateClients() {
         try {
             playerClientConnection.sendTankPacket();
-            for (int i = 0; i < playerClientConnection.getGameRoomInfo().playerCount(); i++) {
-                TankUpdate tankUpdate = playerClientConnection.receiveTankPacket();
+
+            if (battleServer != null) { // HOST
+                WorldUpdate serverSnapshot = battleground.getUpdateSnapshot();
+                Gdx.app.log("GameLoop", "New server snapshot: \n" + serverSnapshot);
+
+                battleServer.setLatestSnapshot(serverSnapshot);
             }
+
+            WorldUpdate worldUpdate = playerClientConnection.pollLatestWorldUpdate();
+            if (worldUpdate != null) {
+                applySnapshot(worldUpdate);
+            }
+
+
+        } catch (SocketTimeoutException ignored) {
+            System.out.println("socket timeout");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void applySnapshot(WorldUpdate worldUpdate) {
+
+        for (TankUpdate tankUpdate : worldUpdate.tankUpdates) {
+            if (tankUpdate.UID != playerTank.UID) {
+                Optional<Tank> optionalTank = battleground.findTankByUID(tankUpdate.UID);
+
+                optionalTank.ifPresentOrElse(
+                    tank -> {
+                        double interpolationX =
+                            tank.hitbox.getX() + (tankUpdate.x - tank.hitbox.getX()) * POSITION_INTERPOLATION_FACTOR;
+                        double interpolationY =
+                            tank.hitbox.getY() + (tankUpdate.y - tank.hitbox.getY()) * POSITION_INTERPOLATION_FACTOR;
+                        tank.hitbox.setX(interpolationX);
+                        tank.hitbox.setY(interpolationY);
+
+                        tank.setMoveDirection(tankUpdate.moveDirection);
+                        tank.setVisualDirection(tankUpdate.visualDirection);
+                        tank.cannon.setAngle(tankUpdate.cannonAngle);
+                        if (tankUpdate.shooting) tank.cannon.tryShoot();
+                        tank.setStationary(tankUpdate.stationary);
+                    }, () -> {
+                        Tank newTank = new Tank(
+                            tankUpdate.UID,
+                            tankUpdate.x,
+                            tankUpdate.y,
+                            30,
+                            50,
+                            1,
+                            TankInputType.PLAYER
+                        );
+                        if (tankUpdate.shooting) newTank.cannon.tryShoot();
+                        battleground.addTank(newTank);
+                    }
+                    );
+
+            }
         }
     }
 
@@ -133,6 +201,7 @@ public class GameLoop implements Runnable {
     private void updateBattleground() {
         for (Tank tank : battleground.getTanks()) {
             tank.update(MAX_GAME_UPDATE_TIME);
+
             if (tank.cannon.hasShootRequest()) {
                 Shell shell = tank.shoot();
                 battleground.addBullet(shell);

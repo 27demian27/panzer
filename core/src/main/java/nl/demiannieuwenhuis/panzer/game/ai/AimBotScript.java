@@ -47,6 +47,7 @@ public class AimBotScript extends BotScript{
 
         this.futurePos = switch (targetTankMoveDirection) {
             case null -> targetCurrentPos;
+            case NONE -> targetCurrentPos;
             case W -> new Vector2D(targetCurrentPos.x - targetSpeed * duration, targetCurrentPos.y);
             case NW -> new Vector2D(
                 targetCurrentPos.x - targetDiagComponentsSpeed * duration,

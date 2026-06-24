@@ -1,5 +1,6 @@
 package nl.demiannieuwenhuis.panzer.game.ui;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -142,7 +143,7 @@ public class MainMenuScreen implements Screen {
                     GameRoom gameRoom = new GameRoom(loadedBattleMap);
                     gameRoom.startControlServer();
                     gameRoom.startBattleServer();
-                    joinOnlineBattle(gameRoom.code);
+                    joinOnlineBattle(gameRoom);
             }
         });
 
@@ -186,12 +187,17 @@ public class MainMenuScreen implements Screen {
     }
 
     private void startVSAiBattle() {
-        game.setScreen(new GameScreen(game, loadedBattleMap, false, ""));
+        game.setScreen(new GameScreen(game, loadedBattleMap, null, null));
         dispose();
     }
 
-    private void joinOnlineBattle(String roomCode) {
-        game.setScreen(new GameScreen(game, loadedBattleMap, true, roomCode));
+    private void joinOnlineBattle(GameRoom gameRoom) {
+        game.setScreen(new GameScreen(game, loadedBattleMap, gameRoom, gameRoom.code));
+        dispose();
+    }
+
+    private void joinOnlineBattle(String gameRoomCode) {
+        game.setScreen(new GameScreen(game, loadedBattleMap, null, gameRoomCode));
         dispose();
     }
 

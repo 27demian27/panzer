@@ -13,10 +13,9 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
-import nl.demiannieuwenhuis.panzer.game.net.ClientConnection;
+import nl.demiannieuwenhuis.panzer.game.net.client.ClientConnection;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-
-import java.net.Socket;
+import nl.demiannieuwenhuis.panzer.game.net.server.BattleServer;
 
 public class GameScreen implements Screen {
 
@@ -28,11 +27,8 @@ public class GameScreen implements Screen {
     private Renderer renderer;
 
     private GameLoop gameLoop;
-    private Thread gameThread;
 
-    private GameRoom gameRoom;
-
-    public GameScreen(Panzer game, BattleMap loadedBattleMap, boolean multiplayer, String roomCode) {
+    public GameScreen(Panzer game, BattleMap loadedBattleMap, GameRoom gameRoom, String gameRoomCode) {
         this.game = game;
         this.loadedBattleMap = loadedBattleMap;
         battleground = new Battleground(1600, 900);
@@ -43,16 +39,18 @@ public class GameScreen implements Screen {
             battleground.setDefaultTileGrid();
 
 
-        // client count verkrijgen door middel van tcp
         renderer = new Renderer();
 
-        Tank playerTank = new Tank(0, 100, 100, 30, 50, 1, TankInputType.PLAYER);
-        battleground.addTank(playerTank);
-        if (multiplayer) {
-            try {
-                ClientConnection playerClientConnection = new ClientConnection(roomCode, playerTank);
-                gameLoop = new GameLoop(battleground, playerClientConnection, renderer);
+        //TODO: GameRoomInfo verkrijgen
 
+        Tank playerTank = new Tank((int) (Math.random() * 100), 100, 100, 30, 50, 1, TankInputType.PLAYER);
+        battleground.addTank(playerTank);
+        if (gameRoomCode != null) {
+            try {
+                ClientConnection playerClientConnection = new ClientConnection(gameRoomCode, playerTank);
+                playerClientConnection.startReceiving();
+                BattleServer battleServer = gameRoom != null ? gameRoom.getBattleServer() : null;
+                gameLoop = new GameLoop(battleground, playerClientConnection, battleServer, renderer);
             } catch (Exception e) {
                 Gdx.app.log("GameScreen", "Could not create client.", e);
                 game.setScreen(new MainMenuScreen(game, loadedBattleMap));
@@ -65,9 +63,9 @@ public class GameScreen implements Screen {
             battleground.getBotTanks().getFirst().setBotScript(
                 new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
             );
-            gameLoop = new GameLoop(battleground, null, renderer);
+            gameLoop = new GameLoop(battleground, null, null, renderer);
         }
-        gameThread = Thread.ofPlatform().start(gameLoop);
+        Thread.ofPlatform().start(gameLoop);
     }
 
     @Override

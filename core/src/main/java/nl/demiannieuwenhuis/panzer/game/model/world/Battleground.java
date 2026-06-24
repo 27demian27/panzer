@@ -2,14 +2,14 @@ package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
+import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.WorldUpdate;
 import nl.demiannieuwenhuis.physics.util.CollisionData;
 import nl.demiannieuwenhuis.physics.util.Collisions;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -29,6 +29,8 @@ public class Battleground {
     private final List<Tank> tanks = new CopyOnWriteArrayList<>();
     private final List<Shell> shells = new CopyOnWriteArrayList<>();
 
+    private long snapshotSequenceNumber = 0;
+
     public Battleground(float width, float height) {
         this.width = width;
         this.height = height;
@@ -37,6 +39,15 @@ public class Battleground {
         int cols = (int) Math.ceil(height / TILE_SIZE);
 
         this.tileGrid = new Tile[rows][cols];
+    }
+
+    public WorldUpdate getUpdateSnapshot() {
+        List<TankUpdate> tankUpdates = tanks.stream().map(Tank::getUpdateSnapshot).toList();
+        return new WorldUpdate(++snapshotSequenceNumber, tankUpdates);
+    }
+
+    public Optional<Tank> findTankByUID(int UID) {
+        return tanks.stream().filter(tank -> tank.UID == UID).findFirst();
     }
 
     public void setDefaultTileGrid() {

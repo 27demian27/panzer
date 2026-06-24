@@ -9,7 +9,7 @@ public class Cannon {
 
     private @Getter final float width;
     private @Getter final float length;
-    private @Getter float angle;
+    private @Getter @Setter float angle;
     private @Getter final float shell_size;
     private @Getter final float shell_speed = 1200.0f;
     private @Getter final float shell_damage = 50.0f;
