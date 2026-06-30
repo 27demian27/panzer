@@ -18,7 +18,7 @@ public class Cannon {
 
 
     private @Setter short rotating_direction = 0;  // <0 left, 0 none, >0 right
-    private long last_shot = 0;
+    private @Getter long last_shot = 0;
     private boolean shoot_request;
 
     public Cannon(float width, float length) {

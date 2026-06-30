@@ -173,8 +173,8 @@ public class Tank {
             .normalized();
     }
 
-    public void resolveShellHit(Shell shell) {
-        current_health -= shell.getDamage();
+    public void damage(float damage) {
+        current_health = Math.max(0.0f, current_health -damage);
 
         if (current_health <= 0.00f) {
             disable();

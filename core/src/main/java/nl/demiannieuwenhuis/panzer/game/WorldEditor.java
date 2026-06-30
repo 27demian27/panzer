@@ -12,7 +12,6 @@ import java.util.*;
 
 public class WorldEditor {
 
-    public final static float EDITOR_UPDATE_TIME = 0.017f;
     private final Battleground battleground;
 
     private final Renderer renderer;
@@ -74,6 +73,10 @@ public class WorldEditor {
 
     public void applyTileContent(ContentType contentType) {
         selectedTiles.forEach(tile -> tile.setContentType(contentType));
+    }
+
+    public void clearTileContent() {
+        selectedTiles.forEach(tile -> tile.setContentType(null));
     }
 
     public void stop() {

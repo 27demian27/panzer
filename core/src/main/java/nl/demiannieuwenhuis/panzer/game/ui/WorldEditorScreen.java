@@ -105,6 +105,15 @@ public class WorldEditorScreen implements Screen {
             });
             contentTable.add(btn).pad(4).minWidth(140).row();
         }
+        TextButton btn = new TextButton("CLEAR", defaultBtnStyle);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                worldEditor.clearTileContent();
+            }
+        });
+        contentTable.add(btn).pad(4).minWidth(140).row();
+
 
         TextButton saveBtn = new TextButton("SAVE", defaultBtnStyle);
         saveBtn.addListener(new ClickListener() {
@@ -169,6 +178,7 @@ public class WorldEditorScreen implements Screen {
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
                 if (button == Input.Buttons.LEFT) {
+                    System.out.println(screenX + " " + screenY);
                     Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
                     worldEditor.selectTile(worldPos.x, worldPos.y);
                     multiselectOriginX = worldPos.x;

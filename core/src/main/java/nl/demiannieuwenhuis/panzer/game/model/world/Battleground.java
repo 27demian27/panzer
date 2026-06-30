@@ -53,7 +53,7 @@ public class Battleground {
     public void setDefaultTileGrid() {
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                    tileGrid[i][j] = new Tile(j * TILE_SIZE, i * TILE_SIZE, SurfaceType.SAND, null, null);
+                    tileGrid[i][j] = new Tile(i * TILE_SIZE, j * TILE_SIZE, SurfaceType.SAND, null, null);
             }
         }
     }
@@ -73,7 +73,7 @@ public class Battleground {
             shells.removeIf(shell -> {
                 if (shell.getShooter() == tank) return false;
                 CollisionData collisionData =  Collisions.rectCircle(tank.hitbox, shell.hitbox);
-                if (collisionData.colliding) tank.resolveShellHit(shell);
+                if (collisionData.colliding) tank.damage(shell.getDamage());
                 return collisionData.colliding;
             });
         }
@@ -91,10 +91,17 @@ public class Battleground {
     public void resolveWallCollisions() {
         for (Tank tank : tanks) {
             for (Tile[] tiles : List.of(tileGrid)) {
+                if (tiles == null) continue;
+
                 for (Tile tile : List.of(tiles)) {
                     if (tile.contentType == ContentType.WALL) {
                         CollisionData collisionData = Collisions.rectRect(tank.hitbox, tile.getHitBox());
                         Collisions.correctPosition(tank.hitbox, tile.getHitBox(), collisionData);
+                    }
+                    else if (tile.contentType == ContentType.HEDGEHOG) {
+                        CollisionData collisionData = Collisions.rectRect(tank.hitbox, tile.getHitBox());
+                        Collisions.correctPosition(tank.hitbox, tile.getHitBox(), collisionData);
+                        if (collisionData.colliding) tank.damage(0.2f);
                     }
                 }
             }

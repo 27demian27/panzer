@@ -30,6 +30,10 @@ public class Renderer {
     public static final Color TRACK_RUTS_COLOR = new Color(Color.BLACK).sub(0, 0, 0, 0.5f);
     public static final Color WALL_COLOR = new Color(Color.GRAY);
     public static final Color BUSH_COLOR = new Color(0.153f, 0.478f, 0.110f, 0.8f);
+    public static final Color EXPLOSIVE_BARREL_COLOR = new Color(0.612f, 0.09f, 0.09f, 1.0f);
+
+    private static final float[] tileDiscoloration =
+        new float[] {0.03f, 0.04f, -0.04f, 0.02f, 0.03f, 0.05f, 0.00f, -0.04f, -0.02f, -0.01f};
 
     private final Animator animator;
 
@@ -185,8 +189,7 @@ public class Renderer {
 
         renderTankHealthBar(tank);
 
-        if (tank.isDisabled())
-            animator.disabledAnimation(tank, dt);
+        animator.tankAnimations(tank, dt);
 
         shapeRenderer.end();
     }
@@ -289,18 +292,37 @@ public class Renderer {
         Tile[][] tileGrid = battleground.getTileGrid();
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                shapeRenderer.setColor(tileGrid[i][j].getSurfaceType().getTerrainColor());
-                shapeRenderer.rect(
-                    i * Battleground.TILE_SIZE,
-                    j * Battleground.TILE_SIZE,
-                    Battleground.TILE_SIZE,
-                    Battleground.TILE_SIZE
-                );
+                renderTile(i * Battleground.TILE_SIZE, j * Battleground.TILE_SIZE, tileGrid[i][j]);
             }
         }
 
 
         shapeRenderer.end();
+    }
+
+    private void renderTile(float x, float y, Tile tile) {
+        int subTilesSize = 5;
+        int subTilesCount = (int) (Battleground.TILE_SIZE / 5);
+        for (int i = 0; i < subTilesCount; i++) {
+            for (int j = 0; j < subTilesCount; j++) {
+
+                int i1 = (i * j + j + i) % tileDiscoloration.length;
+
+                Color subTileColor = new Color(tile.getSurfaceType().getTerrainColor())
+                    .add(tileDiscoloration[i1],
+                        tileDiscoloration[i1],
+                        tileDiscoloration[i1],
+                        0);
+
+                shapeRenderer.setColor(subTileColor);
+                shapeRenderer.rect(
+                    x + i * subTilesSize,
+                    y + j * subTilesSize,
+                    subTilesSize,
+                    subTilesSize
+                );
+            }
+        }
     }
 
     public void renderTileContents(Battleground battleground) {
@@ -325,12 +347,11 @@ public class Renderer {
     private void renderTileContent(float x, float y, float width, float height, Tile tile) {
         if (tile.contentType == null) return;
 
-        if (tile.contentType == ContentType.WALL) {
-            renderWall(x, y, width, height);
-        }
-
-        if (tile.contentType == ContentType.BUSH) {
-            renderBush(x, y, width, height);
+        switch (tile.contentType) {
+            case WALL -> renderWall(x, y, width, height);
+            case BUSH -> renderBush(x, y, width, height);
+            case HEDGEHOG -> renderHedgehog(x, y, width, height);
+            case EXPLOSIVE_BARREL -> renderExplosiveBarrel(x, y, width, height);
         }
     }
 
@@ -351,6 +372,37 @@ public class Renderer {
         float centerY = y + height / 2.0f;
         shapeRenderer.setColor(BUSH_COLOR);
         shapeRenderer.circle(centerX, centerY, width);
+    }
+
+    private void renderHedgehog(float x, float y, float width, float height) {
+        float centerX = x + width / 2.0f;
+        float centerY = y + height / 2.0f;
+        float hedgehogThickness = 5.0f;
+
+        shapeRenderer.setColor(Color.DARK_GRAY);
+        shapeRenderer.rect(
+            x, centerY - hedgehogThickness / 2.0f,
+            Battleground.TILE_SIZE / 2.0f, hedgehogThickness / 2.0f,
+            Battleground.TILE_SIZE, hedgehogThickness,
+            1.0f, 1.0f,
+            -45.0f
+        );
+
+        shapeRenderer.rect(
+            x, centerY - hedgehogThickness / 2.0f,
+            Battleground.TILE_SIZE / 2.0f, hedgehogThickness / 2.0f,
+            Battleground.TILE_SIZE, hedgehogThickness,
+            1.0f, 1.0f,
+            45.0f
+        );
+    }
+
+    private void renderExplosiveBarrel(float x, float y, float width, float height) {
+        float centerX = x + width / 2.0f;
+        float centerY = y + height / 2.0f;
+
+        shapeRenderer.setColor(Color.SCARLET);
+        shapeRenderer.circle(centerX, centerY, (Battleground.TILE_SIZE / 2.0f) * 0.8f);
     }
 
     public void updateCrosshair() {

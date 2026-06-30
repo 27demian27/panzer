@@ -226,7 +226,7 @@ public class GameLoop implements Runnable {
     public void stop() {
         running.set(false);
         stopped.set(true);
-        playerClientConnection.close();
+        if (playerClientConnection != null) playerClientConnection.close();
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     }
 
