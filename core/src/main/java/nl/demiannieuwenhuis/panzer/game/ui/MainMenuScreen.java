@@ -140,10 +140,14 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("MainMenuScreen", "Create Room pressed");
+                try {
                     GameRoom gameRoom = new GameRoom(loadedBattleMap);
                     gameRoom.startControlServer();
                     gameRoom.startBattleServer();
                     joinOnlineBattle(gameRoom);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 

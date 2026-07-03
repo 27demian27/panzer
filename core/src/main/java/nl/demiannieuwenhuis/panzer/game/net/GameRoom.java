@@ -26,8 +26,8 @@ public class GameRoom {
     private final GameRoomControlServer gameRoomControlServer;
     private @Getter final BattleServer battleServer;
 
-    public GameRoom(BattleMap battleMap) {
-        int port = 4445;
+    public GameRoom(BattleMap battleMap) throws IOException {
+        int port = getAvailablePort(new int[]{4200, 4201, 4202, 4204, 4205, 4206, 4207, 4208, 4209, 4210});
         this.code = hashPort(port);
         this.mapFileName = (battleMap != null ? battleMap.fileName : "default_level.map");
         this.connectedClients = new HashSet<>();
@@ -42,6 +42,16 @@ public class GameRoom {
         Gdx.app.log("GameRoom", "Created Room with code: " + code);
 
 
+    }
+
+    private int getAvailablePort(int[] ports) throws IOException {
+        for (int port : ports) {
+            try (ServerSocket s = new ServerSocket(port)){
+                return port;
+            } catch (IOException ignored) {}
+        }
+
+        throw new IOException("No free port available");
     }
 
 //    public List<TankUpdate> getTankUpdates
@@ -78,15 +88,31 @@ public class GameRoom {
             .findAny();
     }
 
-    Optional<Client> findConnectedClient(int id) {
+    public Optional<Client> findConnectedClient(int id) {
         return connectedClients.stream().filter(client -> client.getId() == id).findAny();
     }
 
     private String hashPort(int port) {
-        return "ABCD";
+        System.out.println("hashing port " + port);
+        StringBuilder code = new StringBuilder();
+        while (port > 0) { // assuming port does not start with 0
+            code.append((char) ('A' + port % 10));
+            port /= 10;
+        }
+        code.reverse();
+        System.out.println("to " + code);
+        return code.toString();
     }
 
     public static int unhashRoomCode(String code) {
-        return 4445;
+        System.out.println("unhashing " + code);
+        int port = 0;
+        for (char c :  code.toCharArray()) {
+            port *= 10;
+            if (c > 75) c = 75;
+            port += c - 65;
+        }
+        System.out.println("to port " + port);
+        return port;
     }
 }

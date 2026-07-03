@@ -30,6 +30,7 @@ public class BattleServer extends Thread {
         socket = new DatagramSocket(port);
         socket.setSoTimeout(200);
         setDaemon(false);
+        Gdx.app.log("BattleServer", "Started UDP server on port " + port);
     }
 
     @Override

@@ -3,7 +3,15 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import nl.demiannieuwenhuis.panzer.game.GameLoop;
 import nl.demiannieuwenhuis.panzer.game.Panzer;
 import nl.demiannieuwenhuis.panzer.game.ai.AimBotScript;
@@ -22,8 +30,12 @@ public class GameScreen implements Screen {
 
     private final Panzer game;
     private BattleMap loadedBattleMap;
+    private String gameRoomCode;
 
     private Battleground battleground;
+
+    private Stage stage;
+    private Viewport uiViewport;
 
     private Renderer renderer;
 
@@ -32,6 +44,7 @@ public class GameScreen implements Screen {
     public GameScreen(Panzer game, BattleMap loadedBattleMap, GameRoom gameRoom, String gameRoomCode) {
         this.game = game;
         this.loadedBattleMap = loadedBattleMap;
+        this.gameRoomCode = gameRoomCode;
         battleground = new Battleground(1600, 900);
 
         if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
@@ -69,6 +82,31 @@ public class GameScreen implements Screen {
             gameLoop = new GameLoop(battleground, null, null, renderer);
         }
         Thread.ofPlatform().start(gameLoop);
+
+        uiViewport = new ScreenViewport();
+        stage = new Stage(uiViewport);
+
+        buildUI();
+    }
+
+    private void buildUI() {
+        Skin skin = new Skin();
+
+        BitmapFont font = game.assets.font;
+        skin.add("default-font", font);
+
+        TextField.TextFieldStyle defaultTextFieldStyle = new TextField.TextFieldStyle();
+        defaultTextFieldStyle.font = font;
+        defaultTextFieldStyle.fontColor = new Color(Color.WHITE);
+
+        Table topLeftTable = new Table();
+        topLeftTable.setFillParent(true);
+        topLeftTable.top().left().pad(10);
+
+        TextField roomCodeText = new TextField(gameRoomCode, new TextField.TextFieldStyle(defaultTextFieldStyle));
+        topLeftTable.add(roomCodeText).pad(4).row();
+
+        stage.addActor(topLeftTable);
     }
 
     @Override
@@ -101,6 +139,9 @@ public class GameScreen implements Screen {
             game.setScreen(new MainMenuScreen(game, loadedBattleMap));
             dispose();
         }
+
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
@@ -111,7 +152,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         renderer.dispose();
-
+        stage.dispose();
     }
 
     @Override public void show() {}

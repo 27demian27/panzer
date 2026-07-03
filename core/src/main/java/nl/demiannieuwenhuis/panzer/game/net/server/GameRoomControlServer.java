@@ -1,5 +1,6 @@
 package nl.demiannieuwenhuis.panzer.game.net.server;
 
+import com.badlogic.gdx.Gdx;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
 import nl.demiannieuwenhuis.panzer.game.net.dto.GameRoomInfo;
 
@@ -17,6 +18,7 @@ public class GameRoomControlServer extends Thread {
     public GameRoomControlServer(int port, GameRoom gameRoom) throws IOException {
         this.gameRoom = gameRoom;
         serverSocket = new ServerSocket(port);
+        Gdx.app.log("GameRoomControlServer", "Started TCP server on port " + port);
     }
 
 
