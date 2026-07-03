@@ -47,7 +47,7 @@ public class ClientConnection {
                     WorldUpdate update = receiveWorldUpdate();
                     long incoming = update.sequenceNumber;
                     latestWorldUpdate.updateAndGet(current ->
-                        (current == null || incoming > current.sequenceNumber) ? update : current
+                        (current == null || incoming >= current.sequenceNumber) ? update : current
                     );
                 } catch (SocketTimeoutException ignored) {
                 } catch (IOException e) {

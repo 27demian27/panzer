@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class BattleServer extends Thread {
 
@@ -80,7 +79,7 @@ public class BattleServer extends Thread {
                 TankUpdate tankUpdate = TankUpdate.fromBuffer(incTankBuffer);
 
                 List<TankUpdate> merged = new ArrayList<>(latestSnapshot.tankUpdates);
-                merged.removeIf(t -> t.UID == tankUpdate.UID);
+                merged.removeIf(t -> t.UID() == tankUpdate.UID());
                 merged.add(tankUpdate);
 
                 WorldUpdate outSnapshot = new WorldUpdate(latestSnapshot.sequenceNumber, merged);

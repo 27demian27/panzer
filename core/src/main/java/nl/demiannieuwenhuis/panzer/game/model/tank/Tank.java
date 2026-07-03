@@ -18,7 +18,7 @@ public class Tank {
     public final Cannon cannon;
 
     private @Getter float max_health = 100.0f;
-    private @Getter float current_health = max_health;
+    private @Getter @Setter float current_health = max_health;
 
     private final @Getter TankInputType inputType;
     private @Getter @Setter BotScript botScript;
@@ -30,7 +30,7 @@ public class Tank {
     private @Getter @Setter Direction8 visualDirection;
 
     private @Getter @Setter boolean stationary;
-    private @Getter boolean disabled;
+    private @Getter @Setter boolean disabled;
 
     public Tank(int UID, float x, float y, float width, float height, double mass, TankInputType inputType) {
         this.UID = UID;
@@ -48,11 +48,13 @@ public class Tank {
             UID,
             (float) hitbox.getX(),
             (float) hitbox.getY(),
+            current_health,
             moveDirection,
             visualDirection,
             cannon.getAngle(),
             cannon.hasShootRequest(),
-            stationary
+            stationary,
+            disabled
         );
     }
 

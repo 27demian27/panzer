@@ -3,8 +3,6 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
-import lombok.Getter;
-import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
@@ -20,7 +18,6 @@ import nl.demiannieuwenhuis.physics.util.Vector2D;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -113,34 +110,41 @@ public class GameLoop implements Runnable {
     private void applySnapshot(WorldUpdate worldUpdate) {
 
         for (TankUpdate tankUpdate : worldUpdate.tankUpdates) {
-            if (tankUpdate.UID != playerTank.UID) {
-                Optional<Tank> optionalTank = battleground.findTankByUID(tankUpdate.UID);
+            if (tankUpdate.UID() != playerTank.UID) {
+                Optional<Tank> optionalTank = battleground.findTankByUID(tankUpdate.UID());
 
                 optionalTank.ifPresentOrElse(
                     tank -> {
+                        tank.setCurrent_health(tankUpdate.currentHealth());
+                        tank.setMoveDirection(tankUpdate.moveDirection());
+                        tank.setVisualDirection(tankUpdate.visualDirection());
+
+                        tank.cannon.setAngle(tankUpdate.cannonAngle());
+                        if (tankUpdate.disabled()) {
+                            tank.setDisabled(true);
+                            return;
+                        }
+
                         double interpolationX =
-                            tank.hitbox.getX() + (tankUpdate.x - tank.hitbox.getX()) * POSITION_INTERPOLATION_FACTOR;
+                            tank.hitbox.getX() + (tankUpdate.x() - tank.hitbox.getX()) * POSITION_INTERPOLATION_FACTOR;
                         double interpolationY =
-                            tank.hitbox.getY() + (tankUpdate.y - tank.hitbox.getY()) * POSITION_INTERPOLATION_FACTOR;
+                            tank.hitbox.getY() + (tankUpdate.y() - tank.hitbox.getY()) * POSITION_INTERPOLATION_FACTOR;
                         tank.hitbox.setX(interpolationX);
                         tank.hitbox.setY(interpolationY);
 
-                        tank.setMoveDirection(tankUpdate.moveDirection);
-                        tank.setVisualDirection(tankUpdate.visualDirection);
-                        tank.cannon.setAngle(tankUpdate.cannonAngle);
-                        if (tankUpdate.shooting) tank.cannon.tryShoot();
-                        tank.setStationary(tankUpdate.stationary);
+                        if (tankUpdate.shooting()) tank.cannon.tryShoot();
+                        tank.setStationary(tankUpdate.stationary());
                     }, () -> {
                         Tank newTank = new Tank(
-                            tankUpdate.UID,
-                            tankUpdate.x,
-                            tankUpdate.y,
+                            tankUpdate.UID(),
+                            tankUpdate.x(),
+                            tankUpdate.y(),
                             30,
                             50,
                             1,
                             TankInputType.PLAYER
                         );
-                        if (tankUpdate.shooting) newTank.cannon.tryShoot();
+                        if (tankUpdate.shooting()) newTank.cannon.tryShoot();
                         battleground.addTank(newTank);
                     }
                     );
@@ -161,8 +165,9 @@ public class GameLoop implements Runnable {
 
     private void handleControls() {
 
-        if (playerTank == null)
+        if (playerTank == null || playerTank.isDisabled())
             return;
+
         Direction8 direction = computePlayerDirection();
 
         if (direction == null) {
