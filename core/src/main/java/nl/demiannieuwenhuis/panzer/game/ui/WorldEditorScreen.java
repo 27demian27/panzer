@@ -2,7 +2,9 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -22,6 +24,7 @@ import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class WorldEditorScreen implements Screen {
@@ -178,7 +181,6 @@ public class WorldEditorScreen implements Screen {
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
                 if (button == Input.Buttons.LEFT) {
-                    System.out.println(screenX + " " + screenY);
                     Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
                     worldEditor.selectTile(worldPos.x, worldPos.y);
                     multiselectOriginX = worldPos.x;

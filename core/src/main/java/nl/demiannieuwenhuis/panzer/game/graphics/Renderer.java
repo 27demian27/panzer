@@ -12,16 +12,10 @@ import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
-import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
-import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
-import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
-import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+import nl.demiannieuwenhuis.panzer.game.model.world.*;
+import nl.demiannieuwenhuis.physics.rigidbody.Body;
 
-import java.lang.reflect.Array;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public class Renderer {
     public static final Color HULL_COLOR = new Color(0.427f, 0.439f, 0.310f, 1.0f);
@@ -35,7 +29,7 @@ public class Renderer {
     private static final float[] tileDiscoloration =
         new float[] {0.03f, 0.04f, -0.04f, 0.02f, 0.03f, 0.05f, 0.00f, -0.04f, -0.02f, -0.01f};
 
-    private final Animator animator;
+    public final Animator animator;
 
 
     private final @Getter Cursor crosshairCursor;
@@ -278,8 +272,8 @@ public class Renderer {
             shapeRenderer.setColor(new Color(Color.BLUE).sub(0, 0, 0, 0.5f));
 
         selectedTiles.forEach(tile -> shapeRenderer.rect(
-            (float) tile.getHitBox().getY(),
             (float) tile.getHitBox().getX(),
+            (float) tile.getHitBox().getY(),
             Battleground.TILE_SIZE,
             Battleground.TILE_SIZE
         ));
@@ -336,7 +330,8 @@ public class Renderer {
                     j * Battleground.TILE_SIZE,
                     Battleground.TILE_SIZE,
                     Battleground.TILE_SIZE,
-                    tileGrid[i][j]
+                    tileGrid[i][j],
+                    battleground.getHazards()
                 );
             }
         }
@@ -344,14 +339,20 @@ public class Renderer {
         shapeRenderer.end();
     }
 
-    private void renderTileContent(float x, float y, float width, float height, Tile tile) {
+    private void renderTileContent(float x, float y, float width, float height, Tile tile, List<Hazard<?>> hazards) {
         if (tile.contentType == null) return;
 
         switch (tile.contentType) {
             case WALL -> renderWall(x, y, width, height);
             case BUSH -> renderBush(x, y, width, height);
             case HEDGEHOG -> renderHedgehog(x, y, width, height);
-            case EXPLOSIVE_BARREL -> renderExplosiveBarrel(x, y, width, height);
+            case EXPLOSIVE_BARREL -> {
+                Optional<ExplosiveBarrel> barrel = hazards.stream()
+                    .filter(hazard -> hazard.tile == tile && hazard instanceof ExplosiveBarrel)
+                    .map(hazard -> (ExplosiveBarrel) hazard)
+                    .findFirst();
+                barrel.ifPresent(this::renderExplosiveBarrel);
+            }
         }
     }
 
@@ -397,12 +398,15 @@ public class Renderer {
         );
     }
 
-    private void renderExplosiveBarrel(float x, float y, float width, float height) {
-        float centerX = x + width / 2.0f;
-        float centerY = y + height / 2.0f;
+    private void renderExplosiveBarrel(ExplosiveBarrel barrel) {
+        if (barrel.isExploded()) return;
 
-        shapeRenderer.setColor(Color.SCARLET);
-        shapeRenderer.circle(centerX, centerY, (Battleground.TILE_SIZE / 2.0f) * 0.8f);
+        shapeRenderer.setColor(EXPLOSIVE_BARREL_COLOR);
+        shapeRenderer.circle(
+            (float) (barrel.hitbox.getX() + barrel.hitbox.radius),
+            (float) (barrel.hitbox.getY() + barrel.hitbox.radius),
+            (Battleground.TILE_SIZE / 2.0f) * 0.8f
+        );
     }
 
     public void updateCrosshair() {

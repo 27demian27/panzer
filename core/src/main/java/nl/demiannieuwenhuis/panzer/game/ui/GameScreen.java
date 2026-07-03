@@ -63,7 +63,8 @@ public class GameScreen implements Screen {
             );
             battleground.getBotTanks().getFirst().setBotScript(
 //                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
-                new RandomizedBotScript(battleground.getBotTanks().getFirst())
+//                new RandomizedBotScript(battleground.getBotTanks().getFirst())
+                null
             );
             gameLoop = new GameLoop(battleground, null, null, renderer);
         }
@@ -92,6 +93,7 @@ public class GameScreen implements Screen {
             }
         }
 
+        renderer.animator.hazardAnimations(battleground, delta);
         renderer.updateCrosshair();
 
         if (gameLoop == null || gameLoop.isStopped()) {

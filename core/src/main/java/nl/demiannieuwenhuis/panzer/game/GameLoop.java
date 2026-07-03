@@ -221,6 +221,7 @@ public class GameLoop implements Runnable {
         battleground.removeOutOfBoundsShells();
         battleground.resolveShellHits();
         battleground.resolveWallCollisions();
+        battleground.resolveHazardCollisions();
     }
 
     public void stop() {

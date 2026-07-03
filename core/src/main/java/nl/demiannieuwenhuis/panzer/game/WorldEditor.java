@@ -3,10 +3,7 @@ package nl.demiannieuwenhuis.panzer.game;
 import com.badlogic.gdx.math.Vector4;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
-import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
-import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
-import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
-import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
+import nl.demiannieuwenhuis.panzer.game.model.world.*;
 
 import java.util.*;
 
@@ -72,7 +69,12 @@ public class WorldEditor {
     }
 
     public void applyTileContent(ContentType contentType) {
-        selectedTiles.forEach(tile -> tile.setContentType(contentType));
+        selectedTiles.forEach(tile -> {
+            tile.setContentType(contentType);
+            if (tile.contentType == ContentType.EXPLOSIVE_BARREL) {
+                battleground.addHazard(ExplosiveBarrel.create(tile, 80.0f));
+            }
+        });
     }
 
     public void clearTileContent() {

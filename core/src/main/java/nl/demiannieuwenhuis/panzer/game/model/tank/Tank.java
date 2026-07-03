@@ -154,7 +154,7 @@ public class Tank {
         while (diff < -180) diff += 360;
 
 
-        if (diff > -4.0f && diff < 4.0f)
+        if (diff > -1.6f && diff < 1.6f)
             return 0;
 
         if (diff > 0)

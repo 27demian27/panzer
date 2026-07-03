@@ -26,6 +26,6 @@ public class Tile implements Serializable {
     }
 
     public Rect getHitBox() {
-        return new Rect(Double.POSITIVE_INFINITY, y, x, Battleground.TILE_SIZE,Battleground.TILE_SIZE);
+        return new Rect(Double.POSITIVE_INFINITY, x, y, Battleground.TILE_SIZE, Battleground.TILE_SIZE);
     }
 }
