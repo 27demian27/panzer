@@ -1,6 +1,5 @@
 package nl.demiannieuwenhuis.panzer.game.ui;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -18,12 +17,13 @@ import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapLoader;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
+import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.TcpRequestType;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
-import java.io.IOException;
-import java.net.SocketException;
+import java.io.*;
+import java.net.Socket;
 
 public class MainMenuScreen implements Screen {
 
@@ -201,8 +201,49 @@ public class MainMenuScreen implements Screen {
     }
 
     private void joinOnlineBattle(String gameRoomCode) {
+        GameRoomInfo gameRoomInfo = fetchGameRoomInfo(gameRoomCode);
+        if (gameRoomInfo == null) return;
+        
+        try {
+            loadedBattleMap = BattleMapLoader.loadBattleMap(gameRoomInfo.mapFilename());
+        } catch (IOException e) {
+            Gdx.app.error(
+                "MainMenuScreen",
+                "Error loading map with filename: " + gameRoomInfo.mapFilename(),
+                e
+            );
+        }
         game.setScreen(new GameScreen(game, loadedBattleMap, null, gameRoomCode));
         dispose();
+    }
+
+    private GameRoomInfo fetchGameRoomInfo(String roomCode) {
+        try (
+            Socket socket = new Socket("localhost", GameRoom.unhashRoomCode(roomCode));
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream())
+        ) {
+            Gdx.app.log("MainMenuScreen", "Fetching GameRoom info...");
+
+            // Request
+            out.writeInt(1); // length
+            out.write(0); // type
+            out.flush();
+
+            // Response
+            int payloadLength = in.readInt();
+            Gdx.app.log("MainMenuScreen", "GameRoom info payload length: " + payloadLength);
+            byte[] payload = new byte[payloadLength];
+            TcpRequestType type = TcpRequestType.toType(in.readByte());
+            Gdx.app.log("MainMenuScreen", "GameRoom info payload type: " + type);
+            in.readFully(payload);
+            GameRoomInfo gameRoomInfo = GameRoomInfo.fromByteArray(payload);
+            Gdx.app.log("MainMenuScreen", gameRoomInfo.toString());
+            return gameRoomInfo;
+        } catch (IOException e) {
+            Gdx.app.error("MainMenuScreen", "Error fetching GameRoomInfo: ", e);
+            return null;
+        }
     }
 
     private String getMapName() {

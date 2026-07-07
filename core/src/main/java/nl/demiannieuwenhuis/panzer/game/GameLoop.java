@@ -10,8 +10,8 @@ import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
-import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
 import nl.demiannieuwenhuis.panzer.game.net.server.BattleServer;
 import nl.demiannieuwenhuis.panzer.game.net.client.ClientConnection;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
@@ -109,7 +109,7 @@ public class GameLoop implements Runnable {
 
     private void applySnapshot(WorldUpdate worldUpdate) {
 
-        for (TankUpdate tankUpdate : worldUpdate.tankUpdates) {
+        for (TankUpdate tankUpdate : worldUpdate.tankUpdates()) {
             if (tankUpdate.UID() != playerTank.UID) {
                 Optional<Tank> optionalTank = battleground.findTankByUID(tankUpdate.UID());
 

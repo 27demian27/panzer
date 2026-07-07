@@ -2,12 +2,11 @@ package nl.demiannieuwenhuis.panzer.game.net.client;
 
 import com.badlogic.gdx.Gdx;
 import lombok.Getter;
-import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.GameRoomInfo;
-import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
 
 import java.io.*;
 import java.net.*;
@@ -45,9 +44,9 @@ public class ClientConnection {
             while (!udpSocket.isClosed()) {
                 try {
                     WorldUpdate update = receiveWorldUpdate();
-                    long incoming = update.sequenceNumber;
+                    long incoming = update.sequenceNumber();
                     latestWorldUpdate.updateAndGet(current ->
-                        (current == null || incoming >= current.sequenceNumber) ? update : current
+                        (current == null || incoming >= current.sequenceNumber()) ? update : current
                     );
                 } catch (SocketTimeoutException ignored) {
                 } catch (IOException e) {

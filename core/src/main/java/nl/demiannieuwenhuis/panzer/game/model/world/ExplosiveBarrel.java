@@ -33,7 +33,6 @@ public class ExplosiveBarrel extends Hazard<Circle> {
     public void explode() {
         if (exploded) return;
 
-        System.out.println("boom!");
         exploded = true;
         explosionTime = System.nanoTime();
     }

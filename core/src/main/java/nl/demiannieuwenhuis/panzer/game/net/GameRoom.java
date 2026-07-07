@@ -105,14 +105,12 @@ public class GameRoom {
     }
 
     public static int unhashRoomCode(String code) {
-        System.out.println("unhashing " + code);
         int port = 0;
         for (char c :  code.toCharArray()) {
             port *= 10;
             if (c > 75) c = 75;
             port += c - 65;
         }
-        System.out.println("to port " + port);
         return port;
     }
 }

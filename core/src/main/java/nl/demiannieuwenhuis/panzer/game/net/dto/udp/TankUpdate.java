@@ -1,4 +1,4 @@
-package nl.demiannieuwenhuis.panzer.game.net.dto;
+package nl.demiannieuwenhuis.panzer.game.net.dto.udp;
 
 
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
@@ -80,6 +80,6 @@ public record TankUpdate(
             "cannon angle: " + cannonAngle + "\n" +
             "shooting: " + shooting + "\n" +
             "stationary: " + stationary + "\n" +
-            "disabled: " + stationary + "\n";
+            "disabled: " + disabled + "\n";
     }
 }

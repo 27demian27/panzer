@@ -1,17 +1,9 @@
-package nl.demiannieuwenhuis.panzer.game.net.dto;
+package nl.demiannieuwenhuis.panzer.game.net.dto.udp;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class WorldUpdate {
-
-    public final long sequenceNumber;
-    public final List<TankUpdate> tankUpdates;
-
-    public WorldUpdate(long sequenceNumber, List<TankUpdate> tankUpdates) {
-        this.sequenceNumber = sequenceNumber;
-        this.tankUpdates = tankUpdates;
-    }
+public record WorldUpdate(long sequenceNumber, List<TankUpdate> tankUpdates) {
 
     public ByteBuffer toBuffer() {
         ByteBuffer buffer = ByteBuffer.allocate(

@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.net.client.Client;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
 
 import java.io.IOException;
 import java.net.*;
@@ -79,11 +79,11 @@ public class BattleServer extends Thread {
 
                 TankUpdate tankUpdate = TankUpdate.fromBuffer(incTankBuffer);
 
-                List<TankUpdate> merged = new ArrayList<>(latestSnapshot.tankUpdates);
+                List<TankUpdate> merged = new ArrayList<>(latestSnapshot.tankUpdates());
                 merged.removeIf(t -> t.UID() == tankUpdate.UID());
                 merged.add(tankUpdate);
 
-                WorldUpdate outSnapshot = new WorldUpdate(latestSnapshot.sequenceNumber, merged);
+                WorldUpdate outSnapshot = new WorldUpdate(latestSnapshot.sequenceNumber(), merged);
 
                 ByteBuffer outWorldBuffer = outSnapshot.toBuffer();
 

@@ -2,7 +2,8 @@ package nl.demiannieuwenhuis.panzer.game.net.server;
 
 import com.badlogic.gdx.Gdx;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.TcpRequestType;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -33,7 +34,7 @@ public class GameRoomControlServer extends Thread {
                 new Thread(() -> handleClient(clientSocket)).start();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                Gdx.app.error("GameRoomControlServer", "Error while making connection: ", e);
             }
         }
     }
@@ -45,7 +46,6 @@ public class GameRoomControlServer extends Thread {
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream())
             )
         {
-            System.out.println("");
             int length = in.readInt();
             byte[] data = new byte[length];
             in.readFully(data);
@@ -53,21 +53,23 @@ public class GameRoomControlServer extends Thread {
             DataInputStream msg = new DataInputStream(new ByteArrayInputStream(data));
             byte type = msg.readByte();
 
-            if (type == 0) { // INFO REQUEST
+            if (TcpRequestType.toType(type) == TcpRequestType.INFO) {
+                Gdx.app.log("GameRoomControlServer", "Incoming room info request");
                 byte[] payload = createGameInfoPayload();
 
                 out.writeInt(payload.length);
+                out.writeByte(TcpRequestType.INFO.toByte());
                 out.write(payload);
                 out.flush();
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Gdx.app.error("GameRoomControlServer", "Error while handling request: ", e);
         }
     }
 
     private byte[] createGameInfoPayload() throws IOException {
-        GameRoomInfo info = new GameRoomInfo(
+        GameRoomInfo gameRoomInfo = new GameRoomInfo(
             gameRoom.code,
             gameRoom.getConnectedClients().size(),
             GameRoom.MAX_PLAYERS,
@@ -77,13 +79,8 @@ public class GameRoomControlServer extends Thread {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream packetOut = new DataOutputStream(baos);
 
-        packetOut.writeByte(0);
-        packetOut.writeUTF(info.code());
-        packetOut.writeInt(info.playerCount());
-        packetOut.writeInt(info.maxPlayers());
-        packetOut.writeUTF(info.mapFileName());
+        packetOut.write(gameRoomInfo.toByteArray());
 
-        byte[] payload = baos.toByteArray();
-        return payload;
+        return baos.toByteArray();
     }
 }
