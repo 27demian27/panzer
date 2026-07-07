@@ -115,7 +115,7 @@ public class GameLoop implements Runnable {
 
                 optionalTank.ifPresentOrElse(
                     tank -> {
-                        tank.setCurrent_health(tankUpdate.currentHealth());
+                        tank.setCurrentHealth(tankUpdate.currentHealth());
                         tank.setMoveDirection(tankUpdate.moveDirection());
                         tank.setVisualDirection(tankUpdate.visualDirection());
 

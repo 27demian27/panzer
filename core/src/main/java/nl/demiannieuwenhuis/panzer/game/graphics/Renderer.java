@@ -6,14 +6,12 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.WorldEditor;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.world.*;
-import nl.demiannieuwenhuis.physics.rigidbody.Body;
 
 import java.util.*;
 
@@ -21,7 +19,6 @@ public class Renderer {
     public static final Color HULL_COLOR = new Color(0.427f, 0.439f, 0.310f, 1.0f);
     public static final Color TURRET_COLOR = new Color(HULL_COLOR).sub(0.05f, 0.05f, 0.05f, 0.0f);
     public static final Color TRACK_COLOR = new Color(Color.DARK_GRAY);
-    public static final Color TRACK_RUTS_COLOR = new Color(Color.BLACK).sub(0, 0, 0, 0.5f);
     public static final Color WALL_COLOR = new Color(Color.GRAY);
     public static final Color BUSH_COLOR = new Color(0.153f, 0.478f, 0.110f, 0.8f);
     public static final Color EXPLOSIVE_BARREL_COLOR = new Color(0.612f, 0.09f, 0.09f, 1.0f);
@@ -35,11 +32,8 @@ public class Renderer {
     private final @Getter Cursor crosshairCursor;
     private final Pixmap crosshairPixmap;
 
-    private final int MAX_RUTS;
 
     private @Getter final ShapeRenderer shapeRenderer;
-
-    private final Queue<RectArgs> trackRuts;
 
     public Renderer() {
         this(1);
@@ -47,8 +41,6 @@ public class Renderer {
     public Renderer(int tankCount) {
         this.shapeRenderer = new ShapeRenderer();
         this.animator = new Animator(shapeRenderer);
-        this.trackRuts = new LinkedList<>();
-        MAX_RUTS = 200 * tankCount;
 
         this.crosshairPixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
         this.crosshairCursor = createCrosshair();
@@ -81,14 +73,10 @@ public class Renderer {
         float centerX = x + tank_width / 2.0f;
         float centerY = y + tank_length / 2.0f;
 
-
         float tracksSpacingX = tank_width / 6.0f;
         float tracksSpacingY = tank_length / 12.0f;
         float tracksWidth = tank_width / 3.0f;
         float tracksLength = tank_length - 2 * tracksSpacingY;
-        float rutY = y + tracksSpacingY + centerY - (y + tracksSpacingY);
-        float rutLength = tracksWidth;
-
 
         float turretWidth = tank_width / 1.25f;
         float turretLength = turretWidth;
@@ -117,33 +105,6 @@ public class Renderer {
             Direction8.getRotation(tank.getVisualDirection())
         );
 
-        float leftTrackX = x - tracksSpacingX;
-        float leftTrackY = rutY;
-        float rightTrackX = x + tank_width - tracksSpacingX;
-        float rightTrackY = rutY;
-
-        RectArgs leftTrackRut = new RectArgs(
-            leftTrackX, leftTrackY,
-            centerX - leftTrackX, centerY - leftTrackY,
-            tracksWidth, rutLength,
-            1f, 1f,
-            Direction8.getRotation(tank.getVisualDirection())
-        );
-        RectArgs rightTrackRut = new RectArgs(
-            rightTrackX, rightTrackY,
-            centerX - rightTrackX, centerY - rightTrackY,
-            tracksWidth, rutLength,
-            1f, 1f,
-            Direction8.getRotation(tank.getVisualDirection())
-        );
-
-        trackRuts.add(leftTrackRut);
-        trackRuts.add(rightTrackRut);
-
-        while (trackRuts.size() > MAX_RUTS * 2) {
-            trackRuts.poll();
-        }
-
         // HULL
         shapeRenderer.setColor(HULL_COLOR);
         shapeRenderer.rect(
@@ -161,8 +122,6 @@ public class Renderer {
             1.0f, 1.0f,
             Direction8.getRotation(tank.getVisualDirection())
         );
-
-
 
         // TURRET
         shapeRenderer.setColor(TURRET_COLOR);
@@ -199,7 +158,7 @@ public class Renderer {
         shapeRenderer.setColor(new Color(0.573f, 0.122f, 0.122f, 1.0f));
         shapeRenderer.rect(x, y, width, height);
 
-        float currentHealthBarWidth = Math.max(0, width * (tank.getCurrent_health() / tank.getMax_health()));
+        float currentHealthBarWidth = Math.max(0, width * (tank.getCurrentHealth() / tank.getMaxHealth()));
         shapeRenderer.setColor(Color.SCARLET);
         shapeRenderer.rect(x, y, currentHealthBarWidth, height);
     }
@@ -213,32 +172,6 @@ public class Renderer {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.rect(x, y, 0, 0, width, width * 2.0f, 1.0f, 1.0f, angle);
-        shapeRenderer.end();
-    }
-
-    @AllArgsConstructor
-    private class RectArgs {
-        float x, y;
-        float originX, originY;
-        float width, height;
-        float scaleX, scaleY;
-        float angle;
-    }
-
-    public void renderTrackRuts() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        float a = 0.0f;
-        for (RectArgs rut : trackRuts) {
-            shapeRenderer.setColor(TRACK_RUTS_COLOR.r, TRACK_RUTS_COLOR.g, TRACK_RUTS_COLOR.b, a);
-            shapeRenderer.rect(
-                rut.x, rut.y,
-                rut.originX, rut.originY,
-                rut.width, rut.height,
-                rut.scaleX, rut.scaleY,
-                rut.angle
-            );
-            a += 1f / MAX_RUTS;
-        }
         shapeRenderer.end();
     }
 

@@ -11,20 +11,23 @@ import nl.demiannieuwenhuis.physics.util.Vector2D;
 import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
 
 public class Tank {
+    public static final float STATIONARY_RPM = 600;
+    public static final float MOVING_RPM = 2200;
 
     public final int UID;
 
     public final Rect hitbox;
     public final Cannon cannon;
 
-    private @Getter float max_health = 100.0f;
-    private @Getter @Setter float current_health = max_health;
+    private @Getter float maxHealth = 100.0f;
+    private @Getter @Setter float currentHealth = maxHealth;
 
     private final @Getter TankInputType inputType;
     private @Getter @Setter BotScript botScript;
 
-    private final @Getter float movement_speed = 78;
-    private final @Getter float diag_components_speed = (float) Math.sqrt(Math.pow(movement_speed, 2) / 2.0);
+    private final @Getter float movementSpeed = 78;
+    private final @Getter float diag_components_speed = (float) Math.sqrt(Math.pow(movementSpeed, 2) / 2.0);
+    private @Getter float engineRpm;
 
     private @Getter @Setter Direction8 moveDirection;
     private @Getter @Setter Direction8 visualDirection;
@@ -39,6 +42,7 @@ public class Tank {
         this.cannon = new Cannon(width / 6.0f, height / 2.0f);
         this.moveDirection = NONE;
         this.visualDirection = moveDirection;
+        this.engineRpm = STATIONARY_RPM;
         this.stationary = true;
         this.disabled = false;
     }
@@ -48,7 +52,7 @@ public class Tank {
             UID,
             (float) hitbox.getX(),
             (float) hitbox.getY(),
-            current_health,
+            currentHealth,
             moveDirection,
             visualDirection,
             cannon.getAngle(),
@@ -59,6 +63,7 @@ public class Tank {
     }
 
     public void update(float dt) {
+        this.engineRpm = (stationary ? STATIONARY_RPM : MOVING_RPM);
 
         if (!stationary) {
             switch (moveDirection) {
@@ -69,7 +74,7 @@ public class Tank {
                     else
                         visualDirection = W;
 
-                    hitbox.setX(hitbox.getX() - movement_speed * dt);
+                    hitbox.setX(hitbox.getX() - movementSpeed * dt);
                 }
                 case NW -> {
                     if (visualDirection == SE || visualDirection == S || visualDirection == E)
@@ -84,7 +89,7 @@ public class Tank {
                         visualDirection = S;
                     else
                         visualDirection = N;
-                    hitbox.setY(hitbox.getY() + movement_speed * dt);
+                    hitbox.setY(hitbox.getY() + movementSpeed * dt);
                 }
                 case NE -> {
                     if (visualDirection == SW || visualDirection == S || visualDirection == W)
@@ -99,7 +104,7 @@ public class Tank {
                         visualDirection = W;
                     else
                         visualDirection = E;
-                    hitbox.setX(hitbox.getX() + movement_speed * dt);
+                    hitbox.setX(hitbox.getX() + movementSpeed * dt);
                 }
                 case SE -> {
                     if (visualDirection == NW || visualDirection == N || visualDirection == W)
@@ -114,7 +119,7 @@ public class Tank {
                         visualDirection = N;
                     else
                         visualDirection = S;
-                    hitbox.setY(hitbox.getY() - movement_speed * dt);
+                    hitbox.setY(hitbox.getY() - movementSpeed * dt);
                 }
                 case SW -> {
                     if (visualDirection == NE || visualDirection == N || visualDirection == E)
@@ -176,9 +181,9 @@ public class Tank {
     }
 
     public void damage(float damage) {
-        current_health = Math.max(0.0f, current_health -damage);
+        currentHealth = Math.max(0.0f, currentHealth -damage);
 
-        if (current_health <= 0.00f) {
+        if (currentHealth <= 0.00f) {
             disable();
         }
     }

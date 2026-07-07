@@ -2,6 +2,8 @@ package nl.demiannieuwenhuis.panzer.game.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
+import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ExplosiveBarrel;
@@ -19,17 +21,20 @@ public class Animator {
 
     private final Map<Tank, Float> tankDisabledAnimationTimes;
     private final Map<Tank, Float> tankShootAnimationTimes;
+    private final Map<Tank, Map<Vector2, Float>> tankExhaustAnimationTimes;
     private final Map<ExplosiveBarrel, Float> barrelExplosionAnimationTimes;
 
     private final float tankDisabledAnimationDuration = 3.5f;
     private final float tankShootAnimationDuration = 0.2f;
     private final float barrelExplosionAnimationDuration = 0.2f;
+    private final float tankExhaustSmokeLinger = 0.6f;
 
 
     public Animator(ShapeRenderer shapeRenderer) {
         this.shapeRenderer = shapeRenderer;
         this.tankDisabledAnimationTimes = new HashMap<>();
         this.tankShootAnimationTimes = new HashMap<>();
+        this.tankExhaustAnimationTimes = new HashMap<>();
         this.barrelExplosionAnimationTimes = new HashMap<>();
     }
 
@@ -41,6 +46,10 @@ public class Animator {
 
         if (lastShotDelta <= tankShootAnimationDuration) {
             shootAnimation(tank, dt);
+        }
+
+        if (!tank.isDisabled()) {
+            exhaustAnimation(tank, dt);
         }
     }
 
@@ -82,6 +91,44 @@ public class Animator {
 
         barrelExplosionAnimationTimes.put(barrel, animationTime);
         shapeRenderer.end();
+    }
+
+    private void exhaustAnimation(Tank tank, float dt) {
+        if (!tankExhaustAnimationTimes.containsKey(tank)) tankExhaustAnimationTimes.put(tank, new HashMap<>());
+
+        float EXHAUST_SMOKE_RADIUS = 6.0f;
+        float SPACING_FROM_CENTER = 0.6f;
+
+        Map<Vector2, Float> exhaustSmokes = tankExhaustAnimationTimes.get(tank);
+
+        float lastSmoke = exhaustSmokes.values().stream().reduce(Float.MAX_VALUE, Math::min);
+        float smokesPerSecond = tank.getEngineRpm() / 60.0f;
+        if (lastSmoke >= 1 / smokesPerSecond) {
+            float x = (float) tank.hitbox.getX();
+            float y = (float) tank.hitbox.getY();
+            float centerX = (float) (tank.hitbox.getX() + tank.hitbox.getWidth() / 2.0f);
+            float centerY = (float) (tank.hitbox.getY() + tank.hitbox.getHeight() / 2.0f);
+            float leftExhaustPosX = (float) (x + (tank.hitbox.getWidth() / 2.0f * SPACING_FROM_CENTER));
+            float leftExhaustPosY = y;
+            float rightExhaustPosX = (float) (x + tank.hitbox.getWidth() - (tank.hitbox.getWidth() / 2.0f * SPACING_FROM_CENTER));
+            float rightExhaustPosY = y;
+
+            Vector2 location1 = new Vector2(leftExhaustPosX, leftExhaustPosY)
+                .rotateAroundDeg(new Vector2(centerX, centerY), Direction8.getRotation(tank.getVisualDirection()));
+            Vector2 location2 = new Vector2(rightExhaustPosX, rightExhaustPosY)
+                .rotateAroundDeg(new Vector2(centerX, centerY), Direction8.getRotation(tank.getVisualDirection()));
+
+            exhaustSmokes.put(location1, 0.0f);
+//            exhaustSmokes.put(location2, 0.0f);
+        }
+
+       exhaustSmokes.forEach((location, time) -> {
+           shapeRenderer.setColor(0.500f, 0.500f, 0.500f, 1 - time / tankExhaustSmokeLinger - 0.4f);
+           shapeRenderer.circle(location.x, location.y, EXHAUST_SMOKE_RADIUS * (1 - time / tankExhaustSmokeLinger));
+
+           exhaustSmokes.put(location, time + dt);
+       });
+
     }
 
     private void disabledAnimation(Tank tank, float dt) {

@@ -290,7 +290,6 @@ public class WorldEditorScreen implements Screen {
         renderer.renderTileContents(battleground);
         renderer.renderTilesSelection(worldEditor);
         renderer.renderTileOutlines(battleground, panning);
-        Gdx.gl.glDisable(GL20.GL_BLEND);
 
         stage.act(delta);
         stage.draw();

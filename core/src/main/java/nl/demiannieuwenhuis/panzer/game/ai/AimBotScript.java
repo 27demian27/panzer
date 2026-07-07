@@ -5,18 +5,6 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.physics.util.Vector2D;
 
-import java.util.Random;
-
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.E;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.N;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.NE;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.NW;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.S;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.SE;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.SW;
-import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.W;
-
 public class AimBotScript extends BotScript{
 
     private Tank targetTank;
@@ -36,7 +24,7 @@ public class AimBotScript extends BotScript{
     }
 
     private short calculateTurretDirection(float duration) {
-        float targetSpeed = targetTank.getMovement_speed();
+        float targetSpeed = targetTank.getMovementSpeed();
         float targetDiagComponentsSpeed = targetTank.getDiag_components_speed();
         Direction8 targetTankMoveDirection = targetTank.getMoveDirection();
         Vector2D targetCurrentPos = targetTank.hitbox.getCenterOfMass();

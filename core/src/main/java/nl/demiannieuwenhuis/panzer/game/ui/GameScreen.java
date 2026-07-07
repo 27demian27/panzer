@@ -3,6 +3,7 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -112,6 +113,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.WHITE);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         renderer.renderTileSurfaces(battleground);
         if (battleground.getShells() != null) {
@@ -121,9 +124,6 @@ public class GameScreen implements Screen {
         }
 
         renderer.renderTileContents(battleground);
-
-        // Big performance hit
-//        renderer.renderTrackRuts();
 
         if (battleground.getTanks() != null) {
             for (Tank tank : battleground.getTanks()) {

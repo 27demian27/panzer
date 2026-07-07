@@ -203,7 +203,7 @@ public class MainMenuScreen implements Screen {
     private void joinOnlineBattle(String gameRoomCode) {
         GameRoomInfo gameRoomInfo = fetchGameRoomInfo(gameRoomCode);
         if (gameRoomInfo == null) return;
-        
+
         try {
             loadedBattleMap = BattleMapLoader.loadBattleMap(gameRoomInfo.mapFilename());
         } catch (IOException e) {
