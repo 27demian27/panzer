@@ -1,6 +1,5 @@
 package nl.demiannieuwenhuis.panzer.game;
 
-import com.badlogic.gdx.math.Vector4;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.graphics.Renderer;
 import nl.demiannieuwenhuis.panzer.game.model.world.*;
@@ -40,6 +39,41 @@ public class WorldEditor {
                 }
             }
         );
+    }
+
+    public void selectFillTiles(float x, float y) {
+        selectedTiles.clear();
+        battleground.findTile(x, y).ifPresent(
+            tile -> {
+                Tile[][] tiles = battleground.getTileGrid();
+                int i = (int) Math.floor(x / Battleground.TILE_SIZE);
+                int j = (int) Math.floor(y / Battleground.TILE_SIZE);
+                fillSelection(tiles, i, j, new HashSet<>(), tile.getSurfaceType());
+            }
+        );
+    }
+
+    public void fillSelection(Tile[][] tiles, int i, int j, Set<Tile> visited, SurfaceType surfaceType) {
+        Tile center = tiles[i][j];
+
+        if (visited.contains(center))
+            return;
+
+        if (center.getSurfaceType() == surfaceType) {
+            selectedTiles.add(center);
+            visited.add(center);
+        } else {
+            return;
+        }
+
+        if (i > 0)
+            fillSelection(tiles, i - 1, j, visited, surfaceType);
+        if (i < tiles.length - 1)
+            fillSelection(tiles, i + 1, j, visited, surfaceType);
+        if (j > 0)
+            fillSelection(tiles, i, j - 1, visited, surfaceType);
+        if (j < tiles[i].length - 1)
+            fillSelection(tiles, i, j + 1, visited, surfaceType);
     }
 
     public void addTileSelection(float x, float y) {

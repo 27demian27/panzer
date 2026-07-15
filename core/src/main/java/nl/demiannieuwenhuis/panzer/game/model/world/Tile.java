@@ -5,7 +5,7 @@ import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
 
-import java.beans.Transient;
+
 import java.io.Serializable;
 
 public class Tile implements Serializable {

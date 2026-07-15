@@ -37,7 +37,6 @@ public class GameScreen implements Screen {
     private Stage playerDefeatedStage;
     private Stage mainStage;
     private Viewport uiViewport;
-    private Texture darkOverlayTexture;
 
     private Renderer renderer;
 
@@ -177,12 +176,6 @@ public class GameScreen implements Screen {
         renderer.animator.hazardAnimations(battleground, delta);
         renderer.updateCrosshair();
 
-        if (gameLoop == null || gameLoop.isStopped()) {
-            System.out.println("here");
-            game.setScreen(new MainMenuScreen(game, loadedBattleMap));
-            dispose();
-        }
-
         if (!playerTank.isDisabled()) {
             mainStage.act(delta);
             Gdx.graphics.setCursor(renderer.getCrosshairCursor());
@@ -200,6 +193,13 @@ public class GameScreen implements Screen {
             playerDefeatedStage.act(delta);
             playerDefeatedStage.draw();
         }
+
+        if (gameLoop == null || gameLoop.isStopped()) {
+            System.out.println("here");
+            game.setScreen(new MainMenuScreen(game, loadedBattleMap));
+            dispose();
+        }
+
     }
 
     @Override
@@ -212,7 +212,6 @@ public class GameScreen implements Screen {
         renderer.dispose();
         mainStage.dispose();
         playerDefeatedStage.dispose();
-        darkOverlayTexture.dispose();
     }
 
     @Override public void show() {}

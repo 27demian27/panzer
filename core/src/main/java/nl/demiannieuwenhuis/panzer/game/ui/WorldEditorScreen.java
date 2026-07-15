@@ -4,6 +4,7 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -43,6 +44,7 @@ public class WorldEditorScreen implements Screen {
     private boolean panning, areaMultiSelecting, selectionDrawing;
     private float lastMouseX, lastMouseY;
     private float multiselectOriginX, multiselectOriginY;
+    private SelectionMode selectionMode;
 
     public WorldEditorScreen(Panzer game, BattleMap loadedBattleMap) {
         this.game = game;
@@ -51,6 +53,7 @@ public class WorldEditorScreen implements Screen {
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         battleground = new Battleground(1600, 900);
         renderer = new Renderer();
+        selectionMode = SelectionMode.NORMAL;
 
         if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
             battleground.setTileGrid(loadedBattleMap.tileGrid);
@@ -121,7 +124,6 @@ public class WorldEditorScreen implements Screen {
         saveBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.log("DEBUG", "Button clicked");
 
 
                 javax.swing.SwingUtilities.invokeLater(() -> {
@@ -138,9 +140,9 @@ public class WorldEditorScreen implements Screen {
                                 BattleMap battleMap = new BattleMap(result.trim(), battleground.getTileGrid());
                                 battleMapWriter.saveBattleMap(battleMap);
                                 loadedBattleMap = battleMap;
-                                Gdx.app.log("SaveBattleMap", "Saved as: " + result.trim());
+                                Gdx.app.log("WorldEditorScreen", "Battle map saved as: " + result.trim());
                             } catch (IOException e) {
-                                Gdx.app.error("SaveBattleMap", "Failed to save: " + e.getMessage());
+                                Gdx.app.error("WorldEditorScreen", "Failed to save battle map: " + e.getMessage());
                             }
                         });
                     }
@@ -152,6 +154,32 @@ public class WorldEditorScreen implements Screen {
         actionsTable.top().right().pad(10);
         actionsTable.add(saveBtn).pad(4).row();
 
+
+        TextButton normalDrawingModeButton = new TextButton("NORMAL", defaultBtnStyle);
+        normalDrawingModeButton.addListener(new ClickListener() {
+           @Override
+           public void clicked(InputEvent event, float x, float y) {
+               selectionMode = SelectionMode.NORMAL;
+               Gdx.app.log("WorldEditorScreen", "Switching selection mode to: " + selectionMode);
+           }
+        });
+
+        TextButton fillDrawingModeButton = new TextButton("FILL", defaultBtnStyle);
+        fillDrawingModeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                selectionMode = SelectionMode.FILL;
+                Gdx.app.log("WorldEditorScreen", "Switching selection mode to: " + selectionMode);
+            }
+        });
+
+        Table toolTable = new Table();
+        toolTable.setFillParent(true);
+        toolTable.bottom().right().pad(10);
+        toolTable.add(normalDrawingModeButton).pad(4).row();
+        toolTable.add(fillDrawingModeButton).pad(4).row();
+
+        stage.addActor(toolTable);
         stage.addActor(actionsTable);
         stage.addActor(contentTable);
         stage.addActor(surfaceTable);
@@ -181,11 +209,16 @@ public class WorldEditorScreen implements Screen {
 
                 if (button == Input.Buttons.LEFT) {
                     Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
-                    worldEditor.selectTile(worldPos.x, worldPos.y);
-                    multiselectOriginX = worldPos.x;
-                    multiselectOriginY = worldPos.y;
-                    if (!areaMultiSelecting)
-                        selectionDrawing = true;
+                    if (selectionMode == SelectionMode.NORMAL) {
+                        worldEditor.selectTile(worldPos.x, worldPos.y);
+                        multiselectOriginX = worldPos.x;
+                        multiselectOriginY = worldPos.y;
+                        if (!areaMultiSelecting)
+                            selectionDrawing = true;
+                    } else if (selectionMode == SelectionMode.FILL) {
+                        worldEditor.selectFillTiles(worldPos.x, worldPos.y);
+                    }
+
                 }
 
                 if (button == Input.Buttons.RIGHT) {
@@ -263,6 +296,8 @@ public class WorldEditorScreen implements Screen {
 
                     lastMouseX = screenX;
                     lastMouseY = screenY;
+                } else if (selectionMode == SelectionMode.FILL) {
+                    return false;
                 }
                 else if (selectionDrawing) {
                     Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0));
@@ -284,6 +319,7 @@ public class WorldEditorScreen implements Screen {
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         renderer.getShapeRenderer().setProjectionMatrix(camera.combined);
         renderer.renderTileSurfaces(battleground);
         renderer.renderTileContents(battleground);
