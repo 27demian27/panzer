@@ -56,8 +56,8 @@ public class WorldEditor {
         int tileX2 = (int) Math.floor(x2 / Battleground.TILE_SIZE);
         int tileY2 = (int) Math.floor(y2 / Battleground.TILE_SIZE);
 
-        for (int tx = tileX1; tx < tileX2; tx++) {
-            for (int ty = tileY1; ty < tileY2; ty++) {
+        for (int tx = tileX1; tx <= tileX2; tx++) {
+            for (int ty = tileY1; ty <= tileY2; ty++) {
                 battleground.findTile(tx * Battleground.TILE_SIZE, ty * Battleground.TILE_SIZE)
                     .ifPresent(tile -> selectedTiles.add(tile));
             }
