@@ -14,7 +14,7 @@ import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
 import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
 import nl.demiannieuwenhuis.panzer.game.net.server.BattleServer;
 import nl.demiannieuwenhuis.panzer.game.net.client.ClientConnection;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -118,10 +118,10 @@ public class GameLoop implements Runnable {
                         tank.setCurrentHealth(tankUpdate.currentHealth());
                         tank.setMoveDirection(tankUpdate.moveDirection());
                         tank.setVisualDirection(tankUpdate.visualDirection());
-
                         tank.cannon.setAngle(tankUpdate.cannonAngle());
-                        if (tankUpdate.disabled()) {
-                            tank.setDisabled(true);
+
+                        tank.setDisabled(tankUpdate.disabled());
+                        if (tank.isDisabled()) {
                             return;
                         }
 
@@ -223,6 +223,7 @@ public class GameLoop implements Runnable {
             shell.update(MAX_GAME_UPDATE_TIME);
         }
 
+//        battleground.resolveTileCollisions(); for ruts. (experimental)
         battleground.removeOutOfBoundsShells();
         battleground.resolveShellHits();
         battleground.resolveWallCollisions();

@@ -6,10 +6,11 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
 import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
-import nl.demiannieuwenhuis.physics.util.CollisionData;
-import nl.demiannieuwenhuis.physics.util.Collisions;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Collisions;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
+import nl.demiannieuwenhuis.panzer.game.physics.util.CollisionData;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 import java.util.List;
 import java.util.Optional;
@@ -175,6 +176,33 @@ public class Battleground {
                         CollisionData collisionData = Collisions.rectRect(tank.hitbox, tile.getHitBox());
                         Collisions.correctPosition(tank.hitbox, tile.getHitBox(), collisionData);
                         if (collisionData.colliding) tank.damage(0.2f);
+                    }
+                }
+            }
+        }
+    }
+
+    public void resolveTileCollisions() {
+        for (Tank tank : tanks) {
+            Rect leftTrackHitbox = tank.getLeftTrackHitbox();
+            Rect rightTrackHitbox = tank.getRightTrackHitbox();
+
+            for (int i = 0; i < tileGrid.length; i++) {
+                for (int j = 0; j < tileGrid[i].length; j++) {
+                    Tile tile = tileGrid[i][j];
+                    CollisionData collisionDataLeft = Collisions.rectRect(leftTrackHitbox, tile.getHitBox());
+                    CollisionData collisionDataRight = Collisions.rectRect(rightTrackHitbox, tile.getHitBox());
+                    if (collisionDataLeft.colliding || collisionDataRight.colliding) {
+                        Rect[][] subTiles = tile.subTiles;
+                        boolean[][] subTileTrackMarks = tile.subTilesTrackMarks;
+                        for (int k = 0; k < subTiles.length; k++) {
+                            for (int l = 0; l < subTiles[k].length; l++) {
+                                if (Collisions.rectRect(leftTrackHitbox, subTiles[k][l]).colliding)
+                                    subTileTrackMarks[k][l] = true;
+                                if (Collisions.rectRect(rightTrackHitbox, subTiles[k][l]).colliding)
+                                    subTileTrackMarks[k][l] = true;
+                            }
+                        }
                     }
                 }
             }

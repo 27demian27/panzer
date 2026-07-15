@@ -2,7 +2,6 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -51,7 +50,7 @@ public class WorldEditorScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         battleground = new Battleground(1600, 900);
-        renderer = new Renderer(0);
+        renderer = new Renderer();
 
         if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
             battleground.setTileGrid(loadedBattleMap.tileGrid);

@@ -1,7 +1,7 @@
 package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.Getter;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
 
 public class ExplosiveBarrel extends Hazard<Circle> {
 

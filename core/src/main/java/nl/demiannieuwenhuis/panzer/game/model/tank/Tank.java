@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
 import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Rect;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 import static nl.demiannieuwenhuis.panzer.game.model.tank.Direction8.*;
 
@@ -170,6 +170,52 @@ public class Tank {
             return -1;
 
         return 0;
+    }
+
+    public Rect getLeftTrackHitbox() {
+        float tank_width = (float) hitbox.getWidth(); float tank_length = (float) hitbox.getHeight();
+        float x = (float) hitbox.getX(); float y = (float) hitbox.getY();
+        float centerX = x + tank_width / 2.0f;
+        float centerY = y + tank_length / 2.0f;
+
+        // bad hardcoding
+        float tracksSpacingX = tank_width / 6.0f;
+        float tracksSpacingY = tank_length / 12.0f;
+        float tracksWidth = tank_width / 6.0f;
+        float tracksLength = tank_length - 2 * tracksSpacingY;
+        float leftTrackX = x - tracksSpacingX;
+        float leftTrackY = y + tracksSpacingY;
+
+        // moet draaien om middelpunt
+        Rect rect = new Rect(1, leftTrackX, leftTrackY + tracksLength / 2.0f, tracksWidth, tracksLength / 2.0f);
+        double oldRotation = rect.getRotation();
+        rect.setRotation(Direction8.getRotation(moveDirection));
+        rect.rotateAroundPoint(new Vector2D(centerX, centerY),  rect.getRotation() - oldRotation);
+
+        return rect;
+    }
+
+    public Rect getRightTrackHitbox() {
+        float tank_width = (float) hitbox.getWidth(); float tank_length = (float) hitbox.getHeight();
+        float x = (float) hitbox.getX(); float y = (float) hitbox.getY();
+        float centerX = x + tank_width / 2.0f;
+        float centerY = y + tank_length / 2.0f;
+
+        // bad hardcoding
+        float tracksSpacingX = tank_width / 6.0f;
+        float tracksSpacingY = tank_length / 12.0f;
+        float tracksWidth = tank_width / 6.0f;
+        float tracksLength = tank_length - 2 * tracksSpacingY;
+        float rightTrackX = x + tank_width - tracksSpacingX;
+        float rightTrackY = y + tracksSpacingY;
+
+        // moet draaien om middelpunt
+        Rect rect = new Rect(1, rightTrackX, rightTrackY + tracksLength / 2.0f, tracksWidth, tracksLength / 2.0f);
+        rect.setRotation(Direction8.getRotation(moveDirection));
+        rect.rotateAroundPoint(new Vector2D(centerX, centerY), rect.getRotation());
+
+
+        return rect;
     }
 
     private Vector2D getCannonDirection() {

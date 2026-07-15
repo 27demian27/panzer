@@ -2,14 +2,13 @@ package nl.demiannieuwenhuis.panzer.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -35,31 +34,34 @@ public class GameScreen implements Screen {
 
     private Battleground battleground;
 
-    private Stage stage;
+    private Stage playerDefeatedStage;
+    private Stage mainStage;
     private Viewport uiViewport;
+    private Texture darkOverlayTexture;
 
     private Renderer renderer;
 
     private GameLoop gameLoop;
+
+    private Tank playerTank;
 
     public GameScreen(Panzer game, BattleMap loadedBattleMap, GameRoom gameRoom, String gameRoomCode) {
         this.game = game;
         this.loadedBattleMap = loadedBattleMap;
         this.gameRoomCode = gameRoomCode;
         battleground = new Battleground(1600, 900);
-
-        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
-            battleground.setTileGrid(loadedBattleMap.tileGrid);
-        else
-            battleground.setDefaultTileGrid();
-
-
         renderer = new Renderer();
 
-        //TODO: GameRoomInfo verkrijgen
+        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0) {
+            battleground.setTileGrid(loadedBattleMap.tileGrid);
+        }
+        else {
+            battleground.setDefaultTileGrid();
+        }
 
-        Tank playerTank = new Tank((int) (Math.random() * 100), 100, 100, 30, 50, 1, TankInputType.PLAYER);
+        playerTank = new Tank((int) (Math.random() * 100), 100, 100, 30, 50, 1, TankInputType.PLAYER);
         battleground.addTank(playerTank);
+
         if (gameRoomCode != null) {
             try {
                 ClientConnection playerClientConnection = new ClientConnection(gameRoomCode, playerTank);
@@ -76,16 +78,17 @@ public class GameScreen implements Screen {
                 new Tank(battleground.getTanks().size(), 500, 500, 30, 50, 1, TankInputType.BOT)
             );
             battleground.getBotTanks().getFirst().setBotScript(
-//                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
+                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
 //                new RandomizedBotScript(battleground.getBotTanks().getFirst())
-                null
+//                null
             );
             gameLoop = new GameLoop(battleground, null, null, renderer);
         }
         Thread.ofPlatform().start(gameLoop);
 
         uiViewport = new ScreenViewport();
-        stage = new Stage(uiViewport);
+        mainStage = new Stage(uiViewport);
+        playerDefeatedStage = new Stage(uiViewport);
 
         buildUI();
     }
@@ -96,18 +99,58 @@ public class GameScreen implements Screen {
         BitmapFont font = game.assets.font;
         skin.add("default-font", font);
 
-        TextField.TextFieldStyle defaultTextFieldStyle = new TextField.TextFieldStyle();
-        defaultTextFieldStyle.font = font;
-        defaultTextFieldStyle.fontColor = new Color(Color.WHITE);
+        Pixmap whitePixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        whitePixmap.setColor(Color.WHITE);
+        whitePixmap.fill();
+        skin.add("white", new Texture(whitePixmap));
+        whitePixmap.dispose();
 
+        // Default Text Field Style
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
+        textFieldStyle.font = skin.getFont("default-font");
+        textFieldStyle.fontColor = Color.WHITE;
+        skin.add("default", textFieldStyle);
+
+        // Respawn Button Style
+        TextButton.TextButtonStyle respawnButtonStyle = new TextButton.TextButtonStyle();
+        respawnButtonStyle.font = skin.getFont("default-font");
+        respawnButtonStyle.fontColor = Color.WHITE;
+        respawnButtonStyle.up = skin.newDrawable("white", new Color(0.25f, 0.25f, 0.25f, 1f));
+        respawnButtonStyle.down = skin.newDrawable("white", new Color(0.15f, 0.15f, 0.15f, 1f));
+        respawnButtonStyle.over = skin.newDrawable("white", new Color(0.35f, 0.35f, 0.35f, 1f));
+        skin.add("respawn", respawnButtonStyle);
+
+        // Room Code
         Table topLeftTable = new Table();
         topLeftTable.setFillParent(true);
         topLeftTable.top().left().pad(10);
 
-        TextField roomCodeText = new TextField(gameRoomCode, new TextField.TextFieldStyle(defaultTextFieldStyle));
+        TextField roomCodeText = new TextField(gameRoomCode, skin); // uses "default" style
         topLeftTable.add(roomCodeText).pad(4).row();
 
-        stage.addActor(topLeftTable);
+        // Darkened Overlay
+        Image darkOverlay = new Image(skin.newDrawable("white", new Color(0, 0, 0, 0.25f)));
+        darkOverlay.setFillParent(true);
+
+        // Respawn Button
+        TextButton button = new TextButton("Respawn", skin, "respawn");
+        button.setSize(200, 60);
+        button.setPosition(
+            (playerDefeatedStage.getViewport().getWorldWidth() - button.getWidth()) / 2f,
+            (playerDefeatedStage.getViewport().getWorldHeight() - button.getHeight()) / 2f
+        );
+        button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.log("GameScreen", "Respawn button clicked!");
+                playerTank.setDisabled(false);
+                playerTank.setCurrentHealth(playerTank.getMaxHealth());
+            }
+        });
+
+        playerDefeatedStage.addActor(darkOverlay);
+        playerDefeatedStage.addActor(button);
+        mainStage.addActor(topLeftTable);
     }
 
     @Override
@@ -140,8 +183,23 @@ public class GameScreen implements Screen {
             dispose();
         }
 
-        stage.act(delta);
-        stage.draw();
+        if (!playerTank.isDisabled()) {
+            mainStage.act(delta);
+            Gdx.graphics.setCursor(renderer.getCrosshairCursor());
+            if (Gdx.input.getInputProcessor() != mainStage) {
+                Gdx.input.setInputProcessor(mainStage);
+            }
+        }
+        mainStage.draw();
+
+        if (playerTank.isDisabled()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            if (Gdx.input.getInputProcessor() != playerDefeatedStage) {
+                Gdx.input.setInputProcessor(playerDefeatedStage);
+            }
+            playerDefeatedStage.act(delta);
+            playerDefeatedStage.draw();
+        }
     }
 
     @Override
@@ -152,7 +210,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         renderer.dispose();
-        stage.dispose();
+        mainStage.dispose();
+        playerDefeatedStage.dispose();
+        darkOverlayTexture.dispose();
     }
 
     @Override public void show() {}

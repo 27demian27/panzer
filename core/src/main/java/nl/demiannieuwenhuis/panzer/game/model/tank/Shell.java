@@ -1,8 +1,8 @@
 package nl.demiannieuwenhuis.panzer.game.model.tank;
 
 import lombok.Getter;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 /**
  * A class that represents a cannons shell and its projectile.

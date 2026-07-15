@@ -3,7 +3,7 @@ package nl.demiannieuwenhuis.panzer.game.ai;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
-import nl.demiannieuwenhuis.physics.util.Vector2D;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 public class AimBotScript extends BotScript{
 

@@ -1,7 +1,7 @@
 package nl.demiannieuwenhuis.panzer.game.model.world;
 
 import lombok.AllArgsConstructor;
-import nl.demiannieuwenhuis.physics.rigidbody.Body;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Body;
 
 @AllArgsConstructor
 public class Hazard<T extends Body> {

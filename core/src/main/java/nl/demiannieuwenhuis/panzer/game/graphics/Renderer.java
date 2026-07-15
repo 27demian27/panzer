@@ -12,6 +12,7 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.world.*;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
 
 import java.util.*;
 
@@ -36,9 +37,6 @@ public class Renderer {
     private @Getter final ShapeRenderer shapeRenderer;
 
     public Renderer() {
-        this(1);
-    }
-    public Renderer(int tankCount) {
         this.shapeRenderer = new ShapeRenderer();
         this.animator = new Animator(shapeRenderer);
 
@@ -228,10 +226,11 @@ public class Renderer {
     }
 
     private void renderTile(float x, float y, Tile tile) {
-        int subTilesSize = 5;
-        int subTilesCount = (int) (Battleground.TILE_SIZE / 5);
-        for (int i = 0; i < subTilesCount; i++) {
-            for (int j = 0; j < subTilesCount; j++) {
+        Rect[][] subTiles = tile.subTiles;
+        float subTilesSize = Battleground.TILE_SIZE / Tile.SUBTILES_COUNT;
+
+        for (int i = 0; i < subTiles.length; i++) {
+            for (int j = 0; j < subTiles[i].length; j++) {
 
                 int i1 = (i * j + j + i) % tileDiscoloration.length;
 
@@ -240,6 +239,10 @@ public class Renderer {
                         tileDiscoloration[i1],
                         tileDiscoloration[i1],
                         0);
+
+                if (tile.subTilesTrackMarks[i][j]) {
+                    subTileColor= new Color(subTileColor).sub(0.15f, 0.15f, 0.15f, 0.0f);
+                }
 
                 shapeRenderer.setColor(subTileColor);
                 shapeRenderer.rect(

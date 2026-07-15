@@ -8,7 +8,7 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ExplosiveBarrel;
 import nl.demiannieuwenhuis.panzer.game.model.world.Hazard;
-import nl.demiannieuwenhuis.physics.rigidbody.shapes.Circle;
+import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,8 +39,6 @@ public class Animator {
     }
 
     public void tankAnimations(Tank tank, float dt) {
-        if (tank.isDisabled())
-            disabledAnimation(tank, dt);
 
         float lastShotDelta = (System.nanoTime() - tank.cannon.getLast_shot()) / 1_000_000_000.0f;
 
@@ -48,7 +46,9 @@ public class Animator {
             shootAnimation(tank, dt);
         }
 
-        if (!tank.isDisabled()) {
+        if (tank.isDisabled()) {
+            disabledAnimation(tank, dt);
+        } else {
             exhaustAnimation(tank, dt);
         }
     }
