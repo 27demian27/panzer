@@ -93,6 +93,7 @@ public class Battleground {
                 return collisionData.colliding;
             });
         }
+
         for (Hazard<?> hazard : hazards) {
             if (hazard instanceof ExplosiveBarrel barrel) {
                 shells.removeIf(shell -> {
@@ -103,6 +104,18 @@ public class Battleground {
 
                     return collisionData.colliding;
                 });
+            }
+        }
+        
+        for (Tile[] tiles : tileGrid) {
+            for (Tile tile : tiles) {
+                if (tile.contentType == ContentType.WALL) {
+                    Rect wallHitbox = new Rect(1, tile.getX(), tile.getY(), TILE_SIZE, TILE_SIZE);
+                    shells.removeIf(shell -> {
+                        CollisionData collisionsData = Collisions.rectCircle(wallHitbox, shell.hitbox);
+                        return collisionsData.colliding;
+                    });
+                }
             }
         }
     }
