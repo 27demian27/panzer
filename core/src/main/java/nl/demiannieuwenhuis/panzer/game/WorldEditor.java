@@ -112,7 +112,7 @@ public class WorldEditor {
     }
 
     public void clearTileContent() {
-        selectedTiles.forEach(tile -> tile.setContentType(null));
+        selectedTiles.forEach(tile -> tile.setContentType(ContentType.EMPTY));
     }
 
     public void stop() {

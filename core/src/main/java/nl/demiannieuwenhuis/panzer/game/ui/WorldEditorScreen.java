@@ -55,10 +55,13 @@ public class WorldEditorScreen implements Screen {
         renderer = new Renderer();
         selectionMode = SelectionMode.NORMAL;
 
-        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0)
-            battleground.setTileGrid(loadedBattleMap.tileGrid);
-        else
+        if (loadedBattleMap != null && loadedBattleMap.tileDataGrid.length > 0 && loadedBattleMap.tileDataGrid[0].length > 0) {
+            battleground.setTileGrid(BattleMap.tileDataGridToTileGrid(loadedBattleMap.tileDataGrid));
+        }
+        else {
+            Gdx.app.log("WorldEditorScreen", "loading default map...");
             battleground.setDefaultTileGrid();
+        }
 
         battleMapWriter = new BattleMapWriter(battleground.getTileGrid());
         worldEditor = new WorldEditor(battleground, renderer);
@@ -90,6 +93,8 @@ public class WorldEditorScreen implements Screen {
 
 
         for (SurfaceType surfaceType : SurfaceType.values()) {
+            if (surfaceType.getId().equals("empty") || surfaceType.getId().equals("unknown")) continue;
+
             TextButton btn = new TextButton(surfaceType.name(), getSurfaceTextButtonStyle(surfaceType, font));
             btn.addListener(new ClickListener() {
                 @Override
@@ -101,6 +106,8 @@ public class WorldEditorScreen implements Screen {
         }
 
         for (ContentType contentType : ContentType.values()) {
+            if (contentType.getId().equals("empty") || contentType.getId().equals("unknown")) continue;
+
             TextButton btn = new TextButton(contentType.name(), defaultBtnStyle);
             btn.addListener(new ClickListener() {
                 @Override
@@ -137,7 +144,7 @@ public class WorldEditorScreen implements Screen {
                     if (result != null && !result.trim().isEmpty()) {
                         Gdx.app.postRunnable(() -> {
                             try {
-                                BattleMap battleMap = new BattleMap(result.trim(), battleground.getTileGrid());
+                                BattleMap battleMap = BattleMap.of(result.trim(), battleground.getTileGrid());
                                 battleMapWriter.saveBattleMap(battleMap);
                                 loadedBattleMap = battleMap;
                                 Gdx.app.log("WorldEditorScreen", "Battle map saved as: " + result.trim());

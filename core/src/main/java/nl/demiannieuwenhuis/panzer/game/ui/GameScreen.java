@@ -51,8 +51,8 @@ public class GameScreen implements Screen {
         battleground = new Battleground(1600, 900);
         renderer = new Renderer();
 
-        if (loadedBattleMap != null && loadedBattleMap.tileGrid.length > 0 && loadedBattleMap.tileGrid[0].length > 0) {
-            battleground.setTileGrid(loadedBattleMap.tileGrid);
+        if (loadedBattleMap != null && loadedBattleMap.tileDataGrid.length > 0 && loadedBattleMap.tileDataGrid[0].length > 0) {
+            battleground.setTileGrid(BattleMap.tileDataGridToTileGrid(loadedBattleMap.tileDataGrid));
         }
         else {
             battleground.setDefaultTileGrid();
@@ -195,7 +195,6 @@ public class GameScreen implements Screen {
         }
 
         if (gameLoop == null || gameLoop.isStopped()) {
-            System.out.println("here");
             game.setScreen(new MainMenuScreen(game, loadedBattleMap));
             dispose();
         }

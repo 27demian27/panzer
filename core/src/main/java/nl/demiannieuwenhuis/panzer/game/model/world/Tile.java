@@ -12,7 +12,7 @@ public class Tile implements Serializable {
 
     public static final int SUBTILES_COUNT = 5;
 
-    private final float x, y;
+    private @Getter final float x, y;
     private @Getter @Setter SurfaceType surfaceType;
     public @Getter @Setter ContentType contentType;
 

@@ -56,7 +56,7 @@ public class Battleground {
     public void setDefaultTileGrid() {
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                    tileGrid[i][j] = new Tile(i * TILE_SIZE, j * TILE_SIZE, SurfaceType.SAND, null);
+                    tileGrid[i][j] = new Tile(i * TILE_SIZE, j * TILE_SIZE, SurfaceType.SAND, ContentType.EMPTY);
             }
         }
     }

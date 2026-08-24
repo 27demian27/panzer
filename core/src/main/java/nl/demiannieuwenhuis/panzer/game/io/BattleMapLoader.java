@@ -18,6 +18,7 @@ public class BattleMapLoader {
             throw new FileNotFoundException();
 
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(battleMapFile))) {
+            Gdx.app.log("loadBattleMap", "Loading map: " + battleMapFile.getName());
             return (BattleMap) inputStream.readObject();
         } catch (ClassNotFoundException | ClassCastException e) {
             Gdx.app.log("loadBattleMap", "Could not load: " + battleMapFile.getName(), e);
