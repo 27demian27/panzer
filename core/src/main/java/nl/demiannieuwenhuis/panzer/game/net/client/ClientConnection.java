@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.WorldUpdate;
 
 import java.io.*;
 import java.net.*;

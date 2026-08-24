@@ -15,19 +15,17 @@ public class Tile implements Serializable {
     private final float x, y;
     private @Getter @Setter SurfaceType surfaceType;
     public @Getter @Setter ContentType contentType;
-    public final Direction8 orientation;
 
     public final Rect[][] subTiles;
     public boolean[][] subTilesTrackMarks;
 
     private @Getter @Setter boolean selected;
 
-    public Tile(float x, float y, SurfaceType surfaceType, ContentType contentType, Direction8 orientation) {
+    public Tile(float x, float y, SurfaceType surfaceType, ContentType contentType) {
         this.x = x;
         this.y = y;
         this.surfaceType = surfaceType;
         this.contentType = contentType;
-        this.orientation = orientation;
         this.subTiles = initializeSubTiles();
         this.selected = false;
     }

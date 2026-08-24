@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.net.client.Client;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.WorldUpdate;
 
 import java.io.IOException;
 import java.net.*;

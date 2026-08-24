@@ -1,4 +1,4 @@
-package nl.demiannieuwenhuis.panzer.game.net.dto.tcp;
+package nl.demiannieuwenhuis.panzer.game.net.data.tcp;
 
 import java.io.*;
 

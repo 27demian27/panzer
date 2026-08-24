@@ -3,7 +3,7 @@ package nl.demiannieuwenhuis.panzer.game.model.tank;
 import lombok.Getter;
 import lombok.Setter;
 import nl.demiannieuwenhuis.panzer.game.ai.BotScript;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.TankUpdate;
 import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
 import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
 import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;

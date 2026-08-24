@@ -18,8 +18,8 @@ import nl.demiannieuwenhuis.panzer.game.io.BattleMap;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapLoader;
 import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
-import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.TcpRequestType;
+import nl.demiannieuwenhuis.panzer.game.net.data.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.data.tcp.TcpRequestType;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

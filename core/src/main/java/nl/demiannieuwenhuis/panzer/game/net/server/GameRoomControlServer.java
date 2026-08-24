@@ -2,8 +2,8 @@ package nl.demiannieuwenhuis.panzer.game.net.server;
 
 import com.badlogic.gdx.Gdx;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
-import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.GameRoomInfo;
-import nl.demiannieuwenhuis.panzer.game.net.dto.tcp.TcpRequestType;
+import nl.demiannieuwenhuis.panzer.game.net.data.tcp.GameRoomInfo;
+import nl.demiannieuwenhuis.panzer.game.net.data.tcp.TcpRequestType;
 
 import java.io.*;
 import java.net.ServerSocket;

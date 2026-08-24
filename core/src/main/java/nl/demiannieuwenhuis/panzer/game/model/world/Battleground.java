@@ -4,8 +4,8 @@ import lombok.Getter;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.TankUpdate;
-import nl.demiannieuwenhuis.panzer.game.net.dto.udp.WorldUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.TankUpdate;
+import nl.demiannieuwenhuis.panzer.game.net.data.udp.WorldUpdate;
 import nl.demiannieuwenhuis.panzer.game.physics.util.Collisions;
 import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Circle;
 import nl.demiannieuwenhuis.panzer.game.physics.rigidbody.Rect;
@@ -56,7 +56,7 @@ public class Battleground {
     public void setDefaultTileGrid() {
         for (int i = 0; i < tileGrid.length; i++) {
             for (int j = 0; j < tileGrid[i].length; j++) {
-                    tileGrid[i][j] = new Tile(i * TILE_SIZE, j * TILE_SIZE, SurfaceType.SAND, null, null);
+                    tileGrid[i][j] = new Tile(i * TILE_SIZE, j * TILE_SIZE, SurfaceType.SAND, null);
             }
         }
     }

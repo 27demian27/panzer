@@ -1,4 +1,4 @@
-package nl.demiannieuwenhuis.panzer.game.net.dto.udp;
+package nl.demiannieuwenhuis.panzer.game.net.data.udp;
 
 
 import nl.demiannieuwenhuis.panzer.game.model.tank.Direction8;
