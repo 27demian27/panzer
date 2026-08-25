@@ -289,7 +289,36 @@ public class Renderer {
                     .findFirst();
                 barrel.ifPresent(this::renderExplosiveBarrel);
             }
+            case SPAWN_POINT_A -> renderSpawnPoint(x, y, width, height, Color.BLUE);
+            case SPAWN_POINT_B -> renderSpawnPoint(x, y, width, height, Color.RED);
+            case SPAWN_POINT_C -> renderSpawnPoint(x, y, width, height, Color.GREEN);
+            case SPAWN_POINT_D -> renderSpawnPoint(x, y, width, height, Color.YELLOW);
         }
+    }
+
+    private void renderSpawnPoint(float x, float y , float width, float height, Color flagColor) {
+        float flagPoleWidth = Battleground.TILE_SIZE / 10.0f;
+        float flagPoleHeight = Battleground.TILE_SIZE - Battleground.TILE_SIZE / 5.0f;
+        float flagSize = Battleground.TILE_SIZE / 4.0f;
+        float centerX = x + width / 2.0f;
+        float centerY = y + height / 2.0f;
+
+        shapeRenderer.setColor(WALL_COLOR);
+        shapeRenderer.rect(
+            centerX - flagPoleWidth / 2.0f,
+            centerY - flagPoleHeight / 2.0f,
+            flagPoleWidth,
+            flagPoleHeight
+        );
+
+        shapeRenderer.setColor(flagColor);
+        shapeRenderer.rect(
+            centerX + flagPoleWidth / 2.0f,
+            centerY + flagPoleHeight / 2.0f - flagSize,
+            flagSize,
+            flagSize
+        );
+
     }
 
     private void renderWall(float x, float y, float width, float height) {

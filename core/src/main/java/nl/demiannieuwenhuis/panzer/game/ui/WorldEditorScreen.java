@@ -23,6 +23,7 @@ import nl.demiannieuwenhuis.panzer.game.io.BattleMapWriter;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
 import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
 import java.awt.*;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class WorldEditorScreen implements Screen {
     private static final float ZOOM_SPEED = 0.1f;
     private static final float MIN_ZOOM = 1.4f;
     private static final float MAX_ZOOM = 0.2f;
+    private static final int MAX_TANK_COUNT = 4;
 
     private final Panzer game;
     private OrthographicCamera camera;
@@ -57,6 +59,13 @@ public class WorldEditorScreen implements Screen {
 
         if (loadedBattleMap != null && loadedBattleMap.tileDataGrid.length > 0 && loadedBattleMap.tileDataGrid[0].length > 0) {
             battleground.setTileGrid(BattleMap.tileDataGridToTileGrid(loadedBattleMap.tileDataGrid));
+            for (Tile[] tiles : battleground.getTileGrid()) {
+                for (Tile tile : tiles) {
+                    if (tile.contentType.isSpawnPoint()) {
+                        worldEditor.getSpawnPoints().add(tile.contentType);
+                    }
+                }
+            }
         }
         else {
             Gdx.app.log("WorldEditorScreen", "loading default map...");
@@ -106,25 +115,42 @@ public class WorldEditorScreen implements Screen {
         }
 
         for (ContentType contentType : ContentType.values()) {
-            if (contentType.getId().equals("empty") || contentType.getId().equals("unknown")) continue;
-
-            TextButton btn = new TextButton(contentType.name(), defaultBtnStyle);
-            btn.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    worldEditor.applyTileContent(contentType);
+            switch (contentType) {
+                case EMPTY, UNKNOWN, SPAWN_POINT_A, SPAWN_POINT_B, SPAWN_POINT_C, SPAWN_POINT_D -> {}
+                default -> {
+                    TextButton btn = new TextButton(
+                        contentType.name().replace('_', ' '), defaultBtnStyle
+                    );
+                    btn.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            worldEditor.applyTileContent(contentType);
+                        }
+                    });
+                    contentTable.add(btn).pad(4).minWidth(140).row();
                 }
-            });
-            contentTable.add(btn).pad(4).minWidth(140).row();
+            }
+
         }
-        TextButton btn = new TextButton("CLEAR", defaultBtnStyle);
-        btn.addListener(new ClickListener() {
+
+        // TODO: spawnPointCount in WorldEditor bijhouden. en ook bij clearen weer verminderen
+        TextButton spawnBtn = new TextButton("SPAWN POINT", defaultBtnStyle);
+        spawnBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                worldEditor.setSpawnPoint();
+            }
+        });
+        contentTable.add(spawnBtn).pad(4).minWidth(140).row();
+
+        TextButton clearBtn = new TextButton("CLEAR", defaultBtnStyle);
+        clearBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 worldEditor.clearTileContent();
             }
         });
-        contentTable.add(btn).pad(4).minWidth(140).row();
+        contentTable.add(clearBtn).pad(4).minWidth(140).row();
 
 
         TextButton saveBtn = new TextButton("SAVE", defaultBtnStyle);

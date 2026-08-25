@@ -64,6 +64,7 @@ public class GameScreen implements Screen {
         if (gameRoomCode != null) {
             try {
                 ClientConnection playerClientConnection = new ClientConnection(gameRoomCode, playerTank);
+//                Gdx.app.log("GameScreen", "Player Count: " + playerClientConnection.getGameRoomInfo().playerCount());
                 playerClientConnection.startReceiving();
                 BattleServer battleServer = gameRoom != null ? gameRoom.getBattleServer() : null;
                 gameLoop = new GameLoop(battleground, playerClientConnection, battleServer, renderer);
@@ -77,8 +78,8 @@ public class GameScreen implements Screen {
                 new Tank(battleground.getTanks().size(), 500, 500, 30, 50, 1, TankInputType.BOT)
             );
             battleground.getBotTanks().getFirst().setBotScript(
-                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
-//                new RandomizedBotScript(battleground.getBotTanks().getFirst())
+//                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
+                new RandomizedBotScript(battleground.getBotTanks().getFirst())
 //                null
             );
             gameLoop = new GameLoop(battleground, null, null, renderer);

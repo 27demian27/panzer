@@ -106,7 +106,7 @@ public class Battleground {
                 });
             }
         }
-        
+
         for (Tile[] tiles : tileGrid) {
             for (Tile tile : tiles) {
                 if (tile.contentType == ContentType.WALL) {

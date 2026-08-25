@@ -18,10 +18,13 @@ public class WorldEditor {
 
     private @Getter Set<Tile> selectedTiles;
 
+    private @Getter Set<ContentType> spawnPoints;
+
     public WorldEditor(Battleground battleground, Renderer renderer) {
         this.battleground = battleground;
         this.renderer = renderer;
         selectedTiles = new HashSet<>();
+        spawnPoints = new HashSet<>();
     }
 
 
@@ -111,8 +114,38 @@ public class WorldEditor {
         });
     }
 
+    public void setSpawnPoint() {
+        if (selectedTiles.size() != 1) return;
+
+        Tile tile = selectedTiles.stream().findFirst().orElseThrow();
+
+        if (tile.contentType.isSpawnPoint()) return;
+
+        if (!spawnPoints.contains(ContentType.SPAWN_POINT_A)) {
+            tile.setContentType(ContentType.SPAWN_POINT_A);
+            spawnPoints.add(ContentType.SPAWN_POINT_A);
+        }
+        else if (!spawnPoints.contains(ContentType.SPAWN_POINT_B)) {
+            tile.setContentType(ContentType.SPAWN_POINT_B);
+            spawnPoints.add(ContentType.SPAWN_POINT_B);
+        }
+        else if (!spawnPoints.contains(ContentType.SPAWN_POINT_C)) {
+            tile.setContentType(ContentType.SPAWN_POINT_C);
+            spawnPoints.add(ContentType.SPAWN_POINT_C);
+        }
+        else if (!spawnPoints.contains(ContentType.SPAWN_POINT_D)) {
+            tile.setContentType(ContentType.SPAWN_POINT_D);
+            spawnPoints.add(ContentType.SPAWN_POINT_D);
+        }
+    }
+
     public void clearTileContent() {
-        selectedTiles.forEach(tile -> tile.setContentType(ContentType.EMPTY));
+        selectedTiles.forEach(tile -> {
+            if (tile.contentType.isSpawnPoint()) {
+                spawnPoints.remove(tile.contentType);
+            }
+            tile.setContentType(ContentType.EMPTY);
+        });
     }
 
     public void stop() {
