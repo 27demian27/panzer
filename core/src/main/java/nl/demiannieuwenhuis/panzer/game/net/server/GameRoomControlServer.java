@@ -71,6 +71,7 @@ public class GameRoomControlServer extends Thread {
     private byte[] createGameInfoPayload() throws IOException {
         GameRoomInfo gameRoomInfo = new GameRoomInfo(
             gameRoom.code,
+            gameRoom.ip,
             gameRoom.getConnectedClients().size(),
             GameRoom.MAX_PLAYERS,
             gameRoom.mapFileName

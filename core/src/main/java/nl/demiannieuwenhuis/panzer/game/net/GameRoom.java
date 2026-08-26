@@ -16,9 +16,10 @@ import java.util.stream.Collectors;
 
 public class GameRoom {
     private static int UID = 0;
-    public final String code;
     public static final int MAX_PLAYERS = 8;
 
+    public final String code;
+    public final String ip;
     public final String mapFileName;
 
     private @Getter Set<Client> connectedClients;
@@ -29,6 +30,7 @@ public class GameRoom {
     public GameRoom(BattleMap battleMap) throws IOException {
         int port = getAvailablePort(new int[]{4200, 4201, 4202, 4204, 4205, 4206, 4207, 4208, 4209, 4210});
         this.code = hashPort(port);
+        this.ip = "localhost";
         this.mapFileName = (battleMap != null ? battleMap.fileName : "default_level.map");
         this.connectedClients = new HashSet<>();
         try {
@@ -54,7 +56,6 @@ public class GameRoom {
         throw new IOException("No free port available");
     }
 
-//    public List<TankUpdate> getTankUpdates
 
     public void startControlServer() {
         gameRoomControlServer.start();

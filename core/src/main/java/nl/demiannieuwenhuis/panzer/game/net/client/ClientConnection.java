@@ -141,6 +141,7 @@ public class ClientConnection {
             }
             GameRoomInfo gameRoomInfo = new GameRoomInfo(
                 packetIn.readUTF(),
+                packetIn.readUTF(),
                 packetIn.readInt(),
                 packetIn.readInt(),
                 packetIn.readUTF()
