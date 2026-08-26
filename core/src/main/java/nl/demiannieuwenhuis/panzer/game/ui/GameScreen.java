@@ -22,9 +22,12 @@ import nl.demiannieuwenhuis.panzer.game.model.tank.Shell;
 import nl.demiannieuwenhuis.panzer.game.model.tank.Tank;
 import nl.demiannieuwenhuis.panzer.game.model.tank.TankInputType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Battleground;
+import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
+import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 import nl.demiannieuwenhuis.panzer.game.net.client.ClientConnection;
 import nl.demiannieuwenhuis.panzer.game.net.GameRoom;
 import nl.demiannieuwenhuis.panzer.game.net.server.BattleServer;
+import nl.demiannieuwenhuis.panzer.game.physics.util.Vector2D;
 
 public class GameScreen implements Screen {
 
@@ -44,10 +47,13 @@ public class GameScreen implements Screen {
 
     private Tank playerTank;
 
-    public GameScreen(Panzer game, BattleMap loadedBattleMap, GameRoom gameRoom, String gameRoomCode) {
+    private int playerNumber;
+
+    public GameScreen(Panzer game, BattleMap loadedBattleMap, GameRoom gameRoom, String gameRoomCode, int playerNumber) {
         this.game = game;
         this.loadedBattleMap = loadedBattleMap;
         this.gameRoomCode = gameRoomCode;
+        this.playerNumber = playerNumber;
         battleground = new Battleground(1600, 900);
         renderer = new Renderer();
 
@@ -58,13 +64,21 @@ public class GameScreen implements Screen {
             battleground.setDefaultTileGrid();
         }
 
-        playerTank = new Tank((int) (Math.random() * 100), 100, 100, 30, 50, 1, TankInputType.PLAYER);
+        Vector2D spawnPoint = getSpawnPoint(playerNumber);
+        playerTank = new Tank(
+            (int) (Math.random() * 100),
+            (float) spawnPoint.x,
+            (float) spawnPoint.y,
+            30, 50,
+            1,
+            TankInputType.PLAYER
+        );
         battleground.addTank(playerTank);
 
         if (gameRoomCode != null) {
             try {
                 ClientConnection playerClientConnection = new ClientConnection(gameRoomCode, playerTank);
-//                Gdx.app.log("GameScreen", "Player Count: " + playerClientConnection.getGameRoomInfo().playerCount());
+
                 playerClientConnection.startReceiving();
                 BattleServer battleServer = gameRoom != null ? gameRoom.getBattleServer() : null;
                 gameLoop = new GameLoop(battleground, playerClientConnection, battleServer, renderer);
@@ -74,8 +88,16 @@ public class GameScreen implements Screen {
                 return;
             }
         } else {
+            Vector2D botSpawnPoint = getSpawnPoint(playerNumber + 1);
             battleground.addTank(
-                new Tank(battleground.getTanks().size(), 500, 500, 30, 50, 1, TankInputType.BOT)
+                new Tank(
+                    battleground.getTanks().size(),
+                    (float) botSpawnPoint.x,
+                    (float) botSpawnPoint.y,
+                    30, 50,
+                    1,
+                    TankInputType.BOT
+                )
             );
             battleground.getBotTanks().getFirst().setBotScript(
 //                new AimBotScript(battleground.getBotTanks().getFirst(), battleground.getPlayerTanks().getFirst())
@@ -200,6 +222,30 @@ public class GameScreen implements Screen {
             dispose();
         }
 
+    }
+
+    private Vector2D getSpawnPoint(int playerNumber) {
+        ContentType spawnPointType;
+        switch (playerNumber) {
+            case 1 -> spawnPointType = ContentType.SPAWN_POINT_A;
+            case 2 -> spawnPointType = ContentType.SPAWN_POINT_B;
+            case 3 -> spawnPointType = ContentType.SPAWN_POINT_C;
+            case 4 -> spawnPointType = ContentType.SPAWN_POINT_D;
+            default -> {
+                Gdx.app.error("GameScreen", "Could not get spawn point for player " + playerNumber);
+                return new Vector2D(0, 0);
+            }
+        }
+
+        for (Tile[] tiles : battleground.getTileGrid()) {
+            for (Tile tile : tiles) {
+                if (tile.contentType == spawnPointType) {
+                    return new Vector2D(tile.getX(), tile.getY());
+                }
+            }
+        }
+        Gdx.app.error("GameScreen", "No spawn point exists for player " + playerNumber);
+        return new Vector2D(0, 0);
     }
 
     @Override

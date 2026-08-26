@@ -25,6 +25,7 @@ import nl.demiannieuwenhuis.panzer.game.model.world.ContentType;
 import nl.demiannieuwenhuis.panzer.game.model.world.SurfaceType;
 import nl.demiannieuwenhuis.panzer.game.model.world.Tile;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
@@ -56,6 +57,11 @@ public class WorldEditorScreen implements Screen {
         battleground = new Battleground(1600, 900);
         renderer = new Renderer();
         selectionMode = SelectionMode.NORMAL;
+        battleMapWriter = new BattleMapWriter(battleground.getTileGrid());
+        worldEditor = new WorldEditor(battleground, renderer);
+
+        uiViewport = new ScreenViewport();
+        stage = new Stage(uiViewport);
 
         if (loadedBattleMap != null && loadedBattleMap.tileDataGrid.length > 0 && loadedBattleMap.tileDataGrid[0].length > 0) {
             battleground.setTileGrid(BattleMap.tileDataGridToTileGrid(loadedBattleMap.tileDataGrid));
@@ -71,12 +77,6 @@ public class WorldEditorScreen implements Screen {
             Gdx.app.log("WorldEditorScreen", "loading default map...");
             battleground.setDefaultTileGrid();
         }
-
-        battleMapWriter = new BattleMapWriter(battleground.getTileGrid());
-        worldEditor = new WorldEditor(battleground, renderer);
-
-        uiViewport = new ScreenViewport();
-        stage = new Stage(uiViewport);
 
 
         buildUI();
@@ -133,7 +133,6 @@ public class WorldEditorScreen implements Screen {
 
         }
 
-        // TODO: spawnPointCount in WorldEditor bijhouden. en ook bij clearen weer verminderen
         TextButton spawnBtn = new TextButton("SPAWN POINT", defaultBtnStyle);
         spawnBtn.addListener(new ClickListener() {
             @Override
@@ -160,12 +159,15 @@ public class WorldEditorScreen implements Screen {
 
 
                 javax.swing.SwingUtilities.invokeLater(() -> {
-                    String result = javax.swing.JOptionPane.showInputDialog(
+                    String result = JOptionPane.showInputDialog(
                         null,
                         "Map name:",
                         "Save Map",
-                        javax.swing.JOptionPane.PLAIN_MESSAGE
-                    );
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        null,
+                        loadedBattleMap.name
+                    ).toString();
 
                     if (result != null && !result.trim().isEmpty()) {
                         Gdx.app.postRunnable(() -> {

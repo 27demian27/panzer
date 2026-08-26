@@ -192,19 +192,18 @@ public class MainMenuScreen implements Screen {
     }
 
     private void startVSAiBattle() {
-        game.setScreen(new GameScreen(game, loadedBattleMap, null, null));
+        game.setScreen(new GameScreen(game, loadedBattleMap, null, null, 1));
         dispose();
     }
 
     private void joinOnlineBattle(GameRoom gameRoom) {
-        game.setScreen(new GameScreen(game, loadedBattleMap, gameRoom, gameRoom.code));
+        game.setScreen(new GameScreen(game, loadedBattleMap, gameRoom, gameRoom.code, 1));
         dispose();
     }
 
     private void joinOnlineBattle(String gameRoomCode) {
         GameRoomInfo gameRoomInfo = fetchGameRoomInfo(gameRoomCode);
         if (gameRoomInfo == null) return;
-
         try {
             loadedBattleMap = BattleMapLoader.loadBattleMap(gameRoomInfo.mapFilename());
         } catch (IOException e) {
@@ -214,7 +213,7 @@ public class MainMenuScreen implements Screen {
                 e
             );
         }
-        game.setScreen(new GameScreen(game, loadedBattleMap, null, gameRoomCode));
+        game.setScreen(new GameScreen(game, loadedBattleMap, null, gameRoomCode, gameRoomInfo.playerCount() + 1));
         dispose();
     }
 
